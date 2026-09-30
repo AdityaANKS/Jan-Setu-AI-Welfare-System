@@ -96,13 +96,14 @@ export default function PipelineStudio({ schemes, onGlobalRefresh }) {
     }
   };
 
-  const runStep01Ingest = async (presetId, rawText, recipeOverride = null) => {
+  const runStep01Ingest = async (presetId, rawText, recipeOverride = null, titleOverride = null) => {
     setIngesting(true);
     setIngestError(null);
     const activeRec = recipeOverride || jevifyRecipe;
+    const activeTitle = titleOverride || uploadedFileName;
     try {
       const payload = rawText
-        ? { raw_text: rawText, title: uploadedFileName, jevify_recipe: activeRec }
+        ? { raw_text: rawText, title: activeTitle, jevify_recipe: activeRec }
         : { preset_scheme_id: presetId, jevify_recipe: activeRec };
       const res = await api.ingestPolicy(payload);
       setIngestResult(res);
@@ -116,8 +117,10 @@ export default function PipelineStudio({ schemes, onGlobalRefresh }) {
           res.scheme?.benefit_amount_inr
         );
       }
+      return res;
     } catch (e) {
       setIngestError(e.message || 'Failed to parse Gazette notification.');
+      return null;
     } finally {
       setIngesting(false);
     }
@@ -140,6 +143,12 @@ export default function PipelineStudio({ schemes, onGlobalRefresh }) {
       console.error('Outbound voice error:', e);
     }
   };
+
+  useEffect(() => {
+    setConsentVerification(null);
+    setDbtResult(null);
+    setDbtError(null);
+  }, [selectedCitizenId, selectedPresetId]);
 
   useEffect(() => {
     if (selectedCitizenId && selectedPresetId) {
@@ -447,8 +456,9 @@ export default function PipelineStudio({ schemes, onGlobalRefresh }) {
                   id="jevify-recipe-select"
                   value={jevifyRecipe}
                   onChange={(e) => {
-                    setJevifyRecipe(e.target.value);
-                    runStep01Ingest(selectedPresetId, customGazetteText);
+                    const nextRec = e.target.value;
+                    setJevifyRecipe(nextRec);
+                    runStep01Ingest(selectedPresetId, customGazetteText, nextRec);
                   }}
                   className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-hairline dark:border-navy-muted bg-parchment dark:bg-navy-deep text-xs font-mono text-ink-primary dark:text-white"
                 >
@@ -497,10 +507,7 @@ export default function PipelineStudio({ schemes, onGlobalRefresh }) {
                   onClick={async () => {
                     if (!customGazetteText.trim()) return;
                     setUploadedFileName('custom_gazette_clause.txt');
-                    const parsed = await runStep01Ingest(selectedPresetId, customGazetteText);
-                    if (parsed?.rules) {
-                      await runStep02Match(selectedPresetId, cohortMode, parsed.rules);
-                    }
+                    await runStep01Ingest(selectedPresetId, customGazetteText, jevifyRecipe, 'custom_gazette_clause.txt');
                   }}
                   className="min-h-[40px] px-3 py-1.5 rounded-lg bg-forest text-white text-xs font-semibold hover:opacity-90 shrink-0"
                 >

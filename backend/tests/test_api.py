@@ -202,7 +202,12 @@ def test_jevify_and_openai_siwc_endpoints():
     # Jevify probe
     r_probe = client.post("/api/v1/ai/jevify/probe?recipe=ternary-bonsai-2-27b.llamacpp")
     assert r_probe.status_code == 200
-    assert r_probe.json()["status"] == "PROBED_AND_VERIFIED"
+    probe_json = r_probe.json()
+    assert probe_json["status"] == "PROBED_AND_VERIFIED"
+    assert probe_json["selected_readout_rung"] == "named_token_logprobs"
+    assert "x_jevify/1.0" in probe_json["telemetry_contract"]
+    assert probe_json["prefix_cache_warmup"]["warmup_ms"] > 0
+    assert probe_json["recipe"]["backend"] == "llama.cpp (PrismML)"
 
     # Jevify ask batch
     r_ask = client.post(

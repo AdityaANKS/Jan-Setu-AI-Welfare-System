@@ -1,10 +1,24 @@
 import { handleOfflineRequest } from './offlineFallback';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000/api/v1';
+const CONFIGURED_API_BASE = import.meta.env?.VITE_API_BASE || '';
+const IS_LOCALHOST =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '[::1]');
+
+const API_BASE = CONFIGURED_API_BASE || (IS_LOCALHOST ? 'http://127.0.0.1:8000/api/v1' : '');
+
+// Once we detect no live FastAPI server is running, avoid repeating failed network timeouts on every action
+let useStaticEngineOnly = !API_BASE;
 
 async function request(path, options = {}) {
+  if (useStaticEngineOnly) {
+    return await handleOfflineRequest(path, options);
+  }
+
   const url = `${API_BASE}${path}`;
-  const isFormData = options.body instanceof FormData;
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = isFormData
     ? { ...(options.headers || {}) }
     : {
@@ -15,25 +29,14 @@ async function request(path, options = {}) {
   let res;
   try {
     res = await fetch(url, { ...options, headers });
-  } catch (networkErr) {
-    // Try relative /api/v1 proxy first, then fall back to in-browser static engine (for Netlify/Vercel)
-    if (API_BASE.startsWith('http')) {
-      try {
-        res = await fetch(`/api/v1${path}`, { ...options, headers });
-        const ct = res.headers.get('content-type') || '';
-        if (!ct.includes('application/json')) {
-          return await handleOfflineRequest(path, options);
-        }
-      } catch {
-        return await handleOfflineRequest(path, options);
-      }
-    } else {
-      return await handleOfflineRequest(path, options);
-    }
+  } catch {
+    useStaticEngineOnly = true;
+    return await handleOfflineRequest(path, options);
   }
 
   const contentType = res.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) {
+    useStaticEngineOnly = true;
     return await handleOfflineRequest(path, options);
   }
 

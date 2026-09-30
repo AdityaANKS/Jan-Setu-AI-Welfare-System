@@ -1,4 +1,4 @@
-import SCHEMES from './data/schemes.json';
+import SCHEMES from './data/schemes.json' with { type: 'json' };
 
 function simpleHash(input) {
   let h1 = 0xdeadbeef ^ input.length;
@@ -786,60 +786,9 @@ function dispatchDbtTransaction(citizen, scheme, consentArtefact) {
   };
 }
 
-// Seed initial transaction
-const initialCa = createDepaConsentArtefact(CITIZENS_BY_ID['CIT-002'], SCHEMES[0], 'BHASHINI_VOICE_ASR', 'ಹೌದು, ಒಪ್ಪಿಗೆ ಇದೆ (Haan, manzoor hai)');
-CONSENT_ARTEFACTS.push(initialCa);
-DBT_DISPATCH_LEDGER.push(dispatchDbtTransaction(CITIZENS_BY_ID['CIT-002'], SCHEMES[0], initialCa));
+const STORAGE_KEY = 'JAN_SETU_OFFLINE_STATE_V1';
 
-const JEVIFY_RECIPES = {
-  'gemma-4-e4b-it.llamacpp': {
-    name: 'gemma-4-e4b-it.llamacpp',
-    model: 'Gemma 4 E4B (Q8_0)',
-    kind: 'endpoint',
-    dialect: 'llama.cpp',
-    hardware_profile: 'Local GPU / Edge Node',
-    readout_rung: 'named_token_logprobs',
-    median_latency_ms: 28,
-    policy_29_accuracy: '29/29 (100%)',
-    policy_hard_52_accuracy: '45/52 (86.5%)',
-    long_state_24: '6/6 at 2k (37 ms/question)',
-    recipe_hash: 'sha256:8a4e91c7d2f04b18e6c2291a7f34e9b2',
-    thinking_disabled_verified: true,
-    prefix_cache_enabled: true,
-  },
-  'ternary-bonsai-2-27b.llamacpp': {
-    name: 'ternary-bonsai-2-27b.llamacpp',
-    model: 'Ternary Bonsai 2 27B (PQ2_0)',
-    kind: 'endpoint',
-    dialect: 'llama.cpp (PrismML raw prompt)',
-    hardware_profile: 'NIC District Server (64k Context Slot)',
-    readout_rung: 'named_token_logprobs',
-    median_latency_ms: 99,
-    policy_29_accuracy: '29/29 (100%)',
-    policy_hard_52_accuracy: '46/52 (88.5%)',
-    long_state_24: '24/24 up to 32k (136 ms/question, 33,946 tokens cached)',
-    recipe_hash: 'sha256:3c9b14e0a72d85f1b44c9e02d11f77a8',
-    thinking_disabled_verified: true,
-    prefix_cache_enabled: true,
-  },
-  'deepseek-v4-flash-vision-exp-keys.vllm': {
-    name: 'deepseek-v4-flash-vision-exp-keys.vllm',
-    model: 'DeepSeek-V4-Flash (Vision + Long State)',
-    kind: 'endpoint',
-    dialect: 'vLLM',
-    hardware_profile: 'State Data Center Cluster (LAN)',
-    readout_rung: 'named_token_logprobs',
-    median_latency_ms: 359,
-    policy_29_accuracy: '28/29 (96.6%)',
-    policy_hard_52_accuracy: '47/52 (90.4%)',
-    long_state_24: '24/24 up to 32k (359 ms/question, 31,232 tokens cached)',
-    recipe_hash: 'sha256:f17d40a8b92e55c3109d4e8a6b22c190',
-    thinking_disabled_verified: true,
-    prefix_cache_enabled: true,
-  },
-};
-
-let ACTIVE_SIWC_SESSION = {
+const DEFAULT_SIWC_SESSION = {
   authenticated: true,
   provider: 'OpenAI Sign in with ChatGPT (SIWC)',
   docs_url: 'https://developers.openai.com/siwc',
@@ -869,6 +818,173 @@ let ACTIVE_SIWC_SESSION = {
   tier_01_guardrail: 'SIWC LLM calls are strictly sandboxed to Stage 01 Gazette text-to-AST parsing; eligibility decisions remain 100% deterministic.',
 };
 
+let ACTIVE_SIWC_SESSION = structuredClone(DEFAULT_SIWC_SESSION);
+
+function seedInitialState() {
+  CONSENT_ARTEFACTS.length = 0;
+  DBT_DISPATCH_LEDGER.length = 0;
+  for (const k of Object.keys(HITL_OVERRIDES)) delete HITL_OVERRIDES[k];
+  HITL_AUDIT_TRAIL.length = 0;
+  ACTIVE_SIWC_SESSION = structuredClone(DEFAULT_SIWC_SESSION);
+
+  const initialCa = createDepaConsentArtefact(
+    CITIZENS_BY_ID['CIT-002'],
+    SCHEMES[0],
+    'BHASHINI_VOICE_ASR',
+    'ಹೌದು, ಒಪ್ಪಿಗೆ ಇದೆ (Haan, manzoor hai)'
+  );
+  CONSENT_ARTEFACTS.push(initialCa);
+  DBT_DISPATCH_LEDGER.push(dispatchDbtTransaction(CITIZENS_BY_ID['CIT-002'], SCHEMES[0], initialCa));
+}
+
+function loadPersistedState() {
+  seedInitialState();
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const raw = window.sessionStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.consentArtefacts)) {
+          CONSENT_ARTEFACTS.length = 0;
+          CONSENT_ARTEFACTS.push(...parsed.consentArtefacts);
+        }
+        if (Array.isArray(parsed.dbtDispatchLedger)) {
+          DBT_DISPATCH_LEDGER.length = 0;
+          DBT_DISPATCH_LEDGER.push(...parsed.dbtDispatchLedger);
+        }
+        if (parsed.hitlOverrides && typeof parsed.hitlOverrides === 'object') {
+          for (const k of Object.keys(HITL_OVERRIDES)) delete HITL_OVERRIDES[k];
+          Object.assign(HITL_OVERRIDES, parsed.hitlOverrides);
+        }
+        if (Array.isArray(parsed.hitlAuditTrail)) {
+          HITL_AUDIT_TRAIL.length = 0;
+          HITL_AUDIT_TRAIL.push(...parsed.hitlAuditTrail);
+        }
+        if (parsed.siwcSession && typeof parsed.siwcSession === 'object') {
+          ACTIVE_SIWC_SESSION = parsed.siwcSession;
+        }
+      }
+    }
+  } catch {
+    // Ignore sessionStorage errors in restricted environments
+  }
+}
+
+function savePersistedState() {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          consentArtefacts: CONSENT_ARTEFACTS,
+          dbtDispatchLedger: DBT_DISPATCH_LEDGER,
+          hitlOverrides: HITL_OVERRIDES,
+          hitlAuditTrail: HITL_AUDIT_TRAIL,
+          siwcSession: ACTIVE_SIWC_SESSION,
+        })
+      );
+    }
+  } catch {
+    // Ignore sessionStorage quota or privacy errors
+  }
+}
+
+export function resetOfflineState() {
+  seedInitialState();
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // Ignore
+  }
+}
+
+loadPersistedState();
+
+const JEVIFY_RECIPES = {
+  'gemma-4-e4b-it.llamacpp': {
+    name: 'gemma-4-e4b-it.llamacpp',
+    model: 'Gemma 4 E4B (Q8_0)',
+    kind: 'endpoint',
+    dialect: 'llama.cpp',
+    backend: 'llama.cpp',
+    hardware_profile: 'Local GPU / Edge Node',
+    readout_rung: 'named_token_logprobs',
+    median_latency_ms: 28,
+    policy_29_accuracy: '29/29 (100%)',
+    policy_hard_52_accuracy: '45/52 (86.5%)',
+    long_state_24: '6/6 at 2k (37 ms/question)',
+    recipe_hash: 'sha256:8a4e91c7d2f04b18e6c2291a7f34e9b2',
+    thinking_disabled_verified: true,
+    prefix_cache_enabled: true,
+  },
+  'ternary-bonsai-2-27b.llamacpp': {
+    name: 'ternary-bonsai-2-27b.llamacpp',
+    model: 'Ternary Bonsai 2 27B (PQ2_0)',
+    kind: 'endpoint',
+    dialect: 'llama.cpp (PrismML raw prompt)',
+    backend: 'llama.cpp (PrismML)',
+    hardware_profile: 'NIC District Server (64k Context Slot)',
+    readout_rung: 'named_token_logprobs',
+    median_latency_ms: 99,
+    policy_29_accuracy: '29/29 (100%)',
+    policy_hard_52_accuracy: '46/52 (88.5%)',
+    long_state_24: '24/24 up to 32k (136 ms/question, 33,946 tokens cached)',
+    recipe_hash: 'sha256:3c9b14e0a72d85f1b44c9e02d11f77a8',
+    thinking_disabled_verified: true,
+    prefix_cache_enabled: true,
+  },
+  'deepseek-v4-flash-vision-exp-keys.vllm': {
+    name: 'deepseek-v4-flash-vision-exp-keys.vllm',
+    model: 'DeepSeek-V4-Flash (Vision + Long State)',
+    kind: 'endpoint',
+    dialect: 'vLLM',
+    backend: 'vLLM',
+    hardware_profile: 'State Data Center Cluster (LAN)',
+    readout_rung: 'named_token_logprobs',
+    median_latency_ms: 359,
+    policy_29_accuracy: '28/29 (96.6%)',
+    policy_hard_52_accuracy: '47/52 (90.4%)',
+    long_state_24: '24/24 up to 32k (359 ms/question, 31,232 tokens cached)',
+    recipe_hash: 'sha256:f17d40a8b92e55c3109d4e8a6b22c190',
+    thinking_disabled_verified: true,
+    prefix_cache_enabled: true,
+  },
+  'qwen3-embedding-0.6b.local': {
+    name: 'qwen3-embedding-0.6b.local',
+    model: 'Qwen3-Embedding-0.6B',
+    kind: 'embedding',
+    dialect: 'in-process cosine',
+    backend: 'in-process cosine',
+    hardware_profile: 'In-Process CPU/GPU Fast Filter',
+    readout_rung: 'embedding_cosine_similarity',
+    median_latency_ms: 9,
+    policy_29_accuracy: '19/29 (65.5%)',
+    policy_hard_52_accuracy: '24/52 (46.2%)',
+    long_state_24: 'Fast semantic pre-filter',
+    recipe_hash: 'sha256:5e21b9c044a87d12f08a33e1c90244b1',
+    thinking_disabled_verified: true,
+    prefix_cache_enabled: false,
+  },
+  'bart-large-mnli.local': {
+    name: 'bart-large-mnli.local',
+    model: 'facebook/bart-large-mnli',
+    kind: 'encoder',
+    dialect: 'in-process NLI classifier',
+    backend: 'in-process NLI',
+    hardware_profile: 'In-Process Ultra-Low-Latency NLI',
+    readout_rung: 'encoder_entailment_head',
+    median_latency_ms: 8,
+    policy_29_accuracy: '15/29 (51.7%)',
+    policy_hard_52_accuracy: '28/52 (53.8%)',
+    long_state_24: 'Short-utterance NLU specialist',
+    recipe_hash: 'sha256:1d89c4f209b3e77a4102d88f3a11e605',
+    thinking_disabled_verified: true,
+    prefix_cache_enabled: false,
+  },
+};
+
 function buildKnowledgeGraph() {
   const nodes = [];
   const edges = [];
@@ -896,37 +1012,93 @@ function buildKnowledgeGraph() {
   return { total_nodes: nodes.length, total_edges: edges.length, nodes, edges };
 }
 
+function normalizeProbs(rawScores) {
+  const entries = Object.entries(rawScores);
+  const total = entries.reduce((acc, [, v]) => acc + v, 0) || 1.0;
+  const probs = Object.fromEntries(entries.map(([k, v]) => [k, Number((v / total).toFixed(4))]));
+  if (entries.length > 0) {
+    let topKey = entries[0][0];
+    for (const [k] of entries) {
+      if (probs[k] > probs[topKey]) topKey = k;
+    }
+    const sum = Object.values(probs).reduce((a, b) => a + b, 0);
+    const diff = Number((1.0 - sum).toFixed(4));
+    probs[topKey] = Number(Math.max(0.0, Math.min(1.0, probs[topKey] + diff)).toFixed(4));
+  }
+  return probs;
+}
+
 function askJevifyBatch(state, questions, recipeName = 'gemma-4-e4b-it.llamacpp') {
   const recipe = JEVIFY_RECIPES[recipeName] || JEVIFY_RECIPES['gemma-4-e4b-it.llamacpp'];
-  const cachedTokens = Math.max(24, Math.floor(state.split(/\s+/).length * 1.35));
-  const uttLower = (state.includes(':') && state.toLowerCase().startsWith('citizen response') ? state.split(':').slice(1).join(':') : state).toLowerCase();
-  const hasNeg = /(nahi|nahin|मत|नहीं|नाहीं|मना|do not|don't|dont|cancel|reject|refuse|declined|ಬೇಡ|ಇಲ್ಲ|नाही|नको|வேண்டாம்|\bno\b)/.test(uttLower);
-  const hasAff = /(haan|manzoor|approve|मंजूर|हाँ|सहमत|ಒಪ್ಪಿಗೆ|ಹೌದು|haudu|होय|ஆம்|otp_verified|\byes\b|\b1\b)/.test(uttLower);
+  const cachedTokens = Math.max(24, Math.floor(state.trim().split(/\s+/).length * 1.35));
+  const stateLower = state.toLowerCase();
+
+  let utteranceOnly = state;
+  if (state.includes(':') && stateLower.startsWith('citizen response')) {
+    utteranceOnly = state.split(':').slice(1).join(':').trim();
+  }
+  const uttLower = utteranceOnly.toLowerCase();
+
+  const negationSubstrings = [
+    'nahi', 'nahin', 'मत', 'नहीं', 'नाहीं', 'मना', 'इंकार', 'नइखे',
+    'do not', "don't", 'dont', 'cancel', 'reject', 'refuse', 'declined', 'decline',
+    'ಬೇಡ', 'ಇಲ್ಲ', 'beda', 'illa',
+    'नाही', 'नको', 'nako',
+    'வேண்டாம்', 'இல்லை', 'vendaam', 'illai',
+    'not eligible', 'not approve', 'abort', 'stop',
+  ];
+  const negationWordRegex = /(?:^|[\s,.;:!?\-()])(no|nope|never|ना|मत|नको|ಬೇಡ|ಇಲ್ಲ|வேண்டாம்|இல்லை)(?:$|[\s,.;:!?\-()])/i;
+
+  const affirmativeSubstrings = [
+    'haan', 'manzoor', 'approve', 'मंजूर', 'हाँ', 'हँ', 'सहमत', 'स्वीकार',
+    'ಒಪ್ಪಿಗೆ', 'ಹೌದು', 'haudu', 'oppige',
+    'होय', 'मंजूर आहे', 'hoy',
+    'ஆம்', 'சம்மதம்', 'aam', 'sammatham',
+    'otp_verified::', '1-click citizen portal consent',
+  ];
+  const affirmativeWordRegex = /(?:^|[\s,.;:!?\-()])(yes|ok|okay|sure|1|हाँ|होय|ಹೌದು|ஆம்)(?:$|[\s,.;:!?\-()])/i;
+
+  const hasNeg = negationSubstrings.some((m) => uttLower.includes(m)) || negationWordRegex.test(utteranceOnly);
+  const hasAff = affirmativeSubstrings.some((m) => uttLower.includes(m)) || affirmativeWordRegex.test(utteranceOnly);
 
   const answersList = questions.map((q) => {
+    const qId = q.id || 'q1';
+    const qIdLower = qId.toLowerCase();
     const kind = (q.kind || 'choice').toLowerCase();
+    const prompt = q.prompt || '';
+    const promptLower = prompt.toLowerCase();
+    const qTokens = Math.max(24, Math.floor(prompt.trim().split(/\s+/).length * 1.35));
+
     const x_jevify = {
       recipe: recipe.name,
       kind: recipe.kind,
       readout_rung: recipe.readout_rung,
       cached_tokens: cachedTokens,
-      question_tokens: 14,
+      question_tokens: qTokens,
       latency_ms: recipe.median_latency_ms,
       recipe_hash: recipe.recipe_hash,
       degraded: false,
     };
+
     if (kind === 'noul') {
-      let pTrue = 0.96;
-      if ((q.id || '').includes('negation') || (q.prompt || '').toLowerCase().includes('declined')) {
+      let pTrue = 0.85;
+      if (qIdLower.includes('negation') || promptLower.includes('not') || promptLower.includes('decline') || promptLower.includes('refuse')) {
         pTrue = hasNeg ? 0.96 : 0.03;
-      } else if ((q.id || '').includes('consent')) {
+      } else if (qIdLower.includes('consent') || promptLower.includes('approve') || promptLower.includes('manzoor')) {
         pTrue = hasNeg ? 0.02 : hasAff ? 0.98 : 0.16;
+      } else if (promptLower.includes('land') || promptLower.includes('hectare')) {
+        pTrue = /(hectare|\bha\b|भूमि|जमीन)/.test(stateLower) ? 0.97 : 0.14;
+      } else if (promptLower.includes('income')) {
+        pTrue = /(income|2,50,000|250000|2,00,000|1,80,000|आय)/.test(stateLower) ? 0.96 : 0.18;
+      } else {
+        const hashByte = parseInt(simpleHash(`${state}::${prompt}`).slice(0, 2), 16) || 128;
+        pTrue = Number((0.72 + (hashByte / 255.0) * 0.25).toFixed(4));
       }
       const pFalse = Number((1 - pTrue).toFixed(4));
       return {
-        id: q.id,
+        id: qId,
         kind: 'noul',
-        prompt: q.prompt,
+        prompt,
         noul: pTrue,
         choice: pTrue >= 0.5 ? 'true' : 'false',
         confidence: Math.max(pTrue, pFalse),
@@ -934,16 +1106,74 @@ function askJevifyBatch(state, questions, recipeName = 'gemma-4-e4b-it.llamacpp'
         x_jevify,
       };
     }
-    const opts = q.options || ['agriculture', 'women_child', 'education'];
-    const best = kind === 'score' ? opts[opts.length - 1] : hasNeg && opts.includes('abort_and_purge') ? 'abort_and_purge' : opts[0];
-    const probs = Object.fromEntries(opts.map((o) => [o, o === best ? 0.88 : Number((0.12 / Math.max(1, opts.length - 1)).toFixed(4))]));
+
+    const opts = q.options && q.options.length > 0
+      ? q.options
+      : kind === 'score'
+      ? ['low', 'medium', 'high']
+      : ['option_a', 'option_b'];
+
+    const rawScores = {};
+    for (const opt of opts) {
+      const optL = String(opt).toLowerCase();
+      let scoreVal = 0.04;
+      if (optL === 'abort_and_purge') {
+        scoreVal += hasNeg ? 0.92 : 0.02;
+      } else if (optL === 'affirmative_auto_submit') {
+        scoreVal += hasAff && !hasNeg ? 0.92 : 0.02;
+      } else if (optL === 'request_clarification') {
+        scoreVal += !hasAff && !hasNeg ? 0.88 : 0.04;
+      } else {
+        if (stateLower.includes(optL)) scoreVal += 0.75;
+        if (['agriculture', 'farmer', 'krishi'].includes(optL) && /(farmer|krishi|kisan|land|hectare|pump|irrigation|kcc)/.test(stateLower)) {
+          scoreVal += 0.85;
+        } else if (['women_child', 'women', 'maternity'].includes(optL) && /(women|woman|girl|sukanya|lakshmi|bahin|matru)/.test(stateLower)) {
+          scoreVal += 0.85;
+        } else if (['education', 'student', 'scholarship'].includes(optL) && /(student|scholarship|matric|academic)/.test(stateLower)) {
+          scoreVal += 0.85;
+        } else if (['msme_artisan', 'artisan', 'vishwakarma'].includes(optL) && /(artisan|craft|vishwakarma|toolkit|udyam)/.test(stateLower)) {
+          scoreVal += 0.85;
+        } else if (['healthcare', 'health'].includes(optL) && /(health|abha|ayushman|hospital)/.test(stateLower)) {
+          scoreVal += 0.85;
+        } else if (['strict_boolean', 'clear', 'high', 'critical', 'dbt_pfms', 'affirmative'].includes(optL)) {
+          scoreVal += 0.62;
+        } else if (['medium', 'partial'].includes(optL)) {
+          scoreVal += 0.22;
+        }
+      }
+      rawScores[opt] = scoreVal;
+    }
+
+    const probs = normalizeProbs(rawScores);
+    let bestOpt = opts[0];
+    for (const opt of opts) {
+      if (probs[opt] > probs[bestOpt]) bestOpt = opt;
+    }
+    const confidence = probs[bestOpt];
+
+    if (kind === 'score') {
+      const nOpts = Math.max(1, opts.length - 1);
+      const legend = Object.fromEntries(opts.map((opt, i) => [opt, Number((i / nOpts).toFixed(3))]));
+      const expectedScore = Number(opts.reduce((acc, opt) => acc + probs[opt] * legend[opt], 0).toFixed(4));
+      return {
+        id: qId,
+        kind: 'score',
+        prompt,
+        choice: bestOpt,
+        score: expectedScore,
+        confidence,
+        legend,
+        probabilities: probs,
+        x_jevify,
+      };
+    }
+
     return {
-      id: q.id,
-      kind,
-      prompt: q.prompt,
-      choice: best,
-      score: kind === 'score' ? 0.94 : undefined,
-      confidence: 0.88,
+      id: qId,
+      kind: 'choice',
+      prompt,
+      choice: bestOpt,
+      confidence,
       probabilities: probs,
       x_jevify,
     };
@@ -954,10 +1184,90 @@ function askJevifyBatch(state, questions, recipeName = 'gemma-4-e4b-it.llamacpp'
     warm_state: { state_hash: 'sha256:' + simpleHash(state).slice(0, 16), cached_tokens: cachedTokens, warm_requests: 1, prefix_cache_hit: true },
     recipe: recipe.name,
     recipe_hash: recipe.recipe_hash,
-    total_latency_ms: recipe.median_latency_ms * answersList.length,
+    total_latency_ms: recipe.median_latency_ms * Math.max(1, answersList.length),
     answers: Object.fromEntries(answersList.map((a) => [a.id, a])),
     answers_list: answersList,
   };
+}
+
+async function tryDecompressStream(uint8Slice) {
+  if (typeof DecompressionStream === 'undefined') return null;
+  for (const format of ['deflate', 'deflate-raw']) {
+    try {
+      const ds = new DecompressionStream(format);
+      const writer = ds.writable.getWriter();
+      writer.write(uint8Slice).catch(() => {});
+      writer.close().catch(() => {});
+      const outBuffer = await new Response(ds.readable).arrayBuffer();
+      return new TextDecoder('utf-8', { fatal: false }).decode(outBuffer);
+    } catch {
+      // Try next format
+    }
+  }
+  return null;
+}
+
+async function extractTextFromPdfOrRaw(rawInput, rawBytes = null) {
+  const textStr = String(rawInput || '').trim();
+  const isPdf = textStr.startsWith('%PDF') || (rawBytes && rawBytes.length >= 4 && rawBytes[0] === 0x25 && rawBytes[1] === 0x50 && rawBytes[2] === 0x44 && rawBytes[3] === 0x46);
+
+  if (!isPdf) {
+    if (textStr.length > 0) {
+      let printable = 0;
+      for (let i = 0; i < textStr.length; i++) {
+        const code = textStr.charCodeAt(i);
+        if (code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127 && code !== 65533)) {
+          printable++;
+        }
+      }
+      if (printable / textStr.length < 0.75) {
+        throw new Error('Corrupted binary payload: input is neither valid UTF-8 text nor a readable PDF notification.');
+      }
+    }
+    return textStr;
+  }
+
+  const candidateStreams = [textStr];
+  if (rawBytes && typeof DecompressionStream !== 'undefined') {
+    let byteStr = '';
+    for (let i = 0; i < rawBytes.length; i++) {
+      byteStr += String.fromCharCode(rawBytes[i]);
+    }
+    const streamRegex = /stream[\r\n]+([\s\S]*?)[\r\n]+endstream/g;
+    let m;
+    while ((m = streamRegex.exec(byteStr)) !== null) {
+      const content = m[1];
+      const slice = new Uint8Array(content.length);
+      for (let i = 0; i < content.length; i++) slice[i] = content.charCodeAt(i) & 0xff;
+      const decompressed = await tryDecompressStream(slice);
+      if (decompressed) candidateStreams.push(decompressed);
+    }
+  }
+
+  const extractedFragments = [];
+  const litRegex = /\(([^()\\]*(?:\\.[^()\\]*)*)\)\s*(?:Tj|TJ|')?/g;
+  for (const sText of candidateStreams) {
+    let match;
+    while ((match = litRegex.exec(sText)) !== null) {
+      const cleaned = match[1]
+        .replace(/\\\(/g, '(')
+        .replace(/\\\)/g, ')')
+        .replace(/\\n/g, ' ')
+        .replace(/\\r/g, ' ')
+        .trim();
+      if (cleaned.length >= 3 && /[A-Za-z\u0900-\u097F\u0C80-\u0CFF]{3,}/.test(cleaned)) {
+        if (!/^(?:PDF|Type|Catalog|Pages|Page|Font|Helvetica|Times|Identity-H|FlateDecode|Creator|Producer)\b/.test(cleaned)) {
+          extractedFragments.push(cleaned);
+        }
+      }
+    }
+  }
+
+  const combined = extractedFragments.join(' ').trim();
+  if (combined.split(/\s+/).filter(Boolean).length < 4) {
+    throw new Error('Corrupted or unreadable binary PDF: no extractable Gazette text layer found in PDF stream.');
+  }
+  return combined;
 }
 
 export async function handleOfflineRequest(path, options = {}) {
@@ -965,6 +1275,8 @@ export async function handleOfflineRequest(path, options = {}) {
   const params = new URLSearchParams(queryString || '');
   let body = {};
   let uploadedFilename = null;
+  let uploadedBytes = null;
+
   if (typeof options.body === 'string') {
     try {
       body = JSON.parse(options.body);
@@ -976,12 +1288,21 @@ export async function handleOfflineRequest(path, options = {}) {
     const recipe = options.body.get('jevify_recipe') || 'gemma-4-e4b-it.llamacpp';
     uploadedFilename = file?.name || 'uploaded_gazette.pdf';
     let rawText = '';
-    if (file && typeof file.text === 'function') {
-      rawText = await file.text();
+    if (file) {
+      if (typeof file.arrayBuffer === 'function') {
+        const ab = await file.arrayBuffer();
+        uploadedBytes = new Uint8Array(ab);
+        rawText = new TextDecoder('utf-8', { fatal: false }).decode(uploadedBytes);
+      } else if (typeof file.text === 'function') {
+        rawText = await file.text();
+      }
+    }
+    if (!rawText && (!uploadedBytes || uploadedBytes.length === 0)) {
+      throw new Error('Uploaded file is empty.');
     }
     body = {
-      title: uploadedFilename,
-      raw_text: rawText || 'Karnataka Krishi Sanjeevani farmer holding less than 2.0 hectares income below 2,50,000 KCC active',
+      title: options.body.get('title') || uploadedFilename,
+      raw_text: rawText,
       jevify_recipe: recipe,
     };
   }
@@ -1010,14 +1331,41 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/policy/ingest' || pathname === '/policy/upload-pdf') {
-    const schemeObj = SCHEMES.find((s) => s.id === body.preset_scheme_id) || SCHEMES[0];
-    const hasCustomText = Boolean(body.raw_text && String(body.raw_text).trim());
-    const excerpt = hasCustomText ? String(body.raw_text).trim() : schemeObj.gazette.excerpt;
+    const presetScheme = body.preset_scheme_id
+      ? SCHEMES.find((s) => s.id === body.preset_scheme_id) || null
+      : null;
+    const rawInputStr = String(body.raw_text || '').trim();
+    const hasCustomText = Boolean(rawInputStr) || pathname === '/policy/upload-pdf';
 
+    if (!presetScheme && !hasCustomText) {
+      if (body.preset_scheme_id) {
+        throw new Error('Either preset_scheme_id or non-empty raw_text is required.');
+      }
+    }
+
+    const schemeObj = presetScheme || SCHEMES[0];
+    let excerpt = schemeObj.gazette.excerpt;
     let rules = schemeObj.rules;
     let booleanAst = schemeObj.boolean_ast;
+    let gazetteMeta = schemeObj.gazette;
+    let schemeSummary = {
+      id: schemeObj.id,
+      code: schemeObj.code,
+      name: schemeObj.name,
+      name_hi: schemeObj.name_hi || schemeObj.name,
+      name_kn: schemeObj.name_kn || schemeObj.name,
+      ministry: schemeObj.ministry,
+      benefit_amount_inr: schemeObj.benefit_amount_inr,
+      benefit_summary: schemeObj.benefit_summary,
+      required_vcs: schemeObj.required_vcs,
+    };
+
     if (hasCustomText) {
-      const tl = excerpt.toLowerCase();
+      if (!rawInputStr && (!uploadedBytes || uploadedBytes.length === 0)) {
+        throw new Error('Either preset_scheme_id or non-empty raw_text is required.');
+      }
+      excerpt = await extractTextFromPdfOrRaw(rawInputStr, uploadedBytes);
+      const tl = ` ${excerpt.toLowerCase()} `;
       const extracted = [];
       const astParts = [];
       if (tl.includes('karnataka') || tl.includes('bhoomi') || tl.includes(' ka ')) {
@@ -1061,32 +1409,44 @@ export async function handleOfflineRequest(path, options = {}) {
       }
       rules = extracted;
       booleanAst = `IF (${astParts.join(' AND ')}) -> Proactive_Entitlement_Tier_1`;
+      gazetteMeta = {
+        gazette_id: body.gazette_id || 'GAZ-CUSTOM-2026-901',
+        notification_date: new Date().toISOString().slice(0, 10),
+        section: 'Section 4 — Algorithmic Eligibility Criteria',
+        clause: 'Clause 4.2(a)–(c)',
+        excerpt,
+      };
+      schemeSummary = {
+        id: body.preset_scheme_id || 'SCH-01',
+        code: 'CUSTOM-GAZETTE-2026',
+        name: body.title || 'Custom Gazette Welfare Notification',
+        name_hi: body.title || 'कस्टम गजट कल्याण अधिसूचना',
+        name_kn: body.title || 'ಕಸ್ಟಮ್ ಗೆಜೆಟ್ ಕಲ್ಯಾಣ ಅಧಿಸೂಚನೆ',
+        ministry: body.ministry || 'Ministry of Electronics & IT / State Nodal Dept',
+        benefit_amount_inr: 18000,
+        benefit_summary: '₹18,000 Direct Benefit Transfer',
+        required_vcs: ['in.gov.karnataka.bhoomi.rtc.v2', 'in.gov.nabard.kcc.credential', 'in.gov.nad.income.certificate'],
+      };
     }
 
     return {
       status: 'INGESTED_TO_KNOWLEDGE_GRAPH',
       ingestion_time_seconds: 3.8,
       uploaded_filename: uploadedFilename || undefined,
-      scheme: {
-        id: schemeObj.id,
-        code: hasCustomText ? 'CUSTOM-GAZETTE-2026' : schemeObj.code,
-        name: body.title || schemeObj.name,
-        name_hi: schemeObj.name_hi,
-        name_kn: schemeObj.name_kn,
-        ministry: body.ministry || schemeObj.ministry,
-        benefit_amount_inr: schemeObj.benefit_amount_inr,
-        benefit_summary: schemeObj.benefit_summary,
-        required_vcs: schemeObj.required_vcs,
-      },
-      gazette: { ...schemeObj.gazette, excerpt },
+      scheme: schemeSummary,
+      gazette: gazetteMeta,
       boolean_ast: booleanAst,
       rules,
-      jevify_readout: askJevifyBatch(excerpt, [
-        { id: 'sector_classification', kind: 'choice', prompt: 'Which public welfare domain does this gazette clause govern?', options: ['agriculture', 'women_child', 'education', 'healthcare', 'msme_artisan'] },
-        { id: 'determinism_grade', kind: 'score', prompt: 'How strictly deterministic are the statutory eligibility thresholds?', options: ['ambiguous', 'partial', 'clear', 'strict_boolean'] },
-        { id: 'land_ceiling_present', kind: 'noul', prompt: 'The gazette specifies a maximum agricultural land holding ceiling.' },
-        { id: 'income_ceiling_present', kind: 'noul', prompt: 'The gazette specifies a maximum household annual income threshold.' },
-      ], body.jevify_recipe),
+      jevify_readout: askJevifyBatch(
+        excerpt,
+        [
+          { id: 'sector_classification', kind: 'choice', prompt: 'Which public welfare domain does this gazette clause govern?', options: ['agriculture', 'women_child', 'education', 'healthcare', 'msme_artisan'] },
+          { id: 'determinism_grade', kind: 'score', prompt: 'How strictly deterministic are the statutory eligibility thresholds?', options: ['ambiguous', 'partial', 'clear', 'strict_boolean'] },
+          { id: 'land_ceiling_present', kind: 'noul', prompt: 'The gazette specifies a maximum agricultural land holding ceiling.' },
+          { id: 'income_ceiling_present', kind: 'noul', prompt: 'The gazette specifies a maximum household annual income threshold.' },
+        ],
+        body.jevify_recipe
+      ),
       openai_siwc_parser: { active_model: ACTIVE_SIWC_SESSION.active_model, tier_01_compliance: 'LLM restricted strictly to text-to-AST parsing; zero black-box eligibility scoring.' },
     };
   }
@@ -1125,7 +1485,10 @@ export async function handleOfflineRequest(path, options = {}) {
 
   if (pathname.startsWith('/citizens/') && pathname.endsWith('/entitlements')) {
     const citizenId = decodeURIComponent(pathname.split('/')[2]);
-    const citizen = CITIZENS_BY_ID[citizenId] || CITIZENS[0];
+    const citizen = CITIZENS_BY_ID[citizenId];
+    if (!citizen) {
+      throw new Error(`Citizen '${citizenId}' not found.`);
+    }
     const evals = SCHEMES.map((s) => evaluateCitizenScheme(citizen, s));
     const eligibleList = evals.filter((e) => e.eligible);
     const nonEligibleList = evals.filter((e) => !e.eligible);
@@ -1149,10 +1512,21 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/match/cohort') {
-    const baseScheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-01')) || SCHEMES[0];
+    const baseScheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-01'));
+    if (!baseScheme && !body.custom_rules) {
+      throw new Error(`Scheme '${body.scheme_id}' not found.`);
+    }
+    const fallback = baseScheme || SCHEMES[0];
     const scheme = body.custom_rules
-      ? { ...baseScheme, rules: body.custom_rules, boolean_ast: body.custom_boolean_ast || baseScheme.boolean_ast }
-      : baseScheme;
+      ? {
+          ...fallback,
+          id: body.scheme_id || 'SCH-CUSTOM',
+          name: body.custom_scheme_name || fallback.name,
+          benefit_amount_inr: body.custom_benefit_inr || fallback.benefit_amount_inr,
+          boolean_ast: body.custom_boolean_ast || fallback.boolean_ast,
+          rules: body.custom_rules,
+        }
+      : fallback;
     const pool = (body.cohort || 'ka_100') === 'ka_100' ? CITIZENS.filter((c) => c.in_ka_100_pool) : CITIZENS;
     const eligibleCandidates = [];
     const hitlFlaggedCandidates = [];
@@ -1222,8 +1596,10 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/voice/outbound') {
-    const citizen = CITIZENS_BY_ID[body.citizen_id] || CITIZENS[0];
-    const scheme = SCHEMES.find((s) => s.id === body.scheme_id) || SCHEMES[0];
+    const citizen = CITIZENS_BY_ID[body.citizen_id || 'CIT-001'];
+    if (!citizen) throw new Error(`Citizen '${body.citizen_id}' not found.`);
+    const scheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-02'));
+    if (!scheme) throw new Error(`Scheme '${body.scheme_id}' not found.`);
     const lang = body.language || citizen.preferred_language || 'hi';
     const scripts = scheme.voice_scripts || {};
     const firstName = citizen.name.split(' (')[0].split(' #')[0];
@@ -1265,15 +1641,21 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/voice/verify-consent') {
-    const citizen = CITIZENS_BY_ID[body.citizen_id] || CITIZENS[0];
-    const scheme = SCHEMES.find((s) => s.id === body.scheme_id) || SCHEMES[0];
-    const utterance = body.otp_code ? `OTP_VERIFIED::${body.otp_code}` : (body.spoken_text || 'Haan, manzoor hai').trim();
+    const citizen = CITIZENS_BY_ID[body.citizen_id || 'CIT-001'];
+    if (!citizen) throw new Error(`Citizen '${body.citizen_id}' not found.`);
+    const scheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-02'));
+    if (!scheme) throw new Error(`Scheme '${body.scheme_id}' not found.`);
+    const rawSpoken = body.spoken_text !== undefined ? String(body.spoken_text).trim() : 'Haan, manzoor hai';
+    const utterance = body.otp_code ? `OTP_VERIFIED::${body.otp_code}` : rawSpoken;
+    if (!utterance) {
+      throw new Error('Either spoken_text or otp_code must be provided.');
+    }
     const jevifyEval = askJevifyBatch(
-      `Citizen Response to ${scheme.name}: ${utterance}`,
+      `Citizen Response to ${scheme.name} (${scheme.benefit_summary}): ${utterance}`,
       [
         { id: 'consent_affirmative', kind: 'noul', prompt: 'The citizen explicitly consents and approves auto-submission via DigiLocker.' },
         { id: 'negation_flip_guard', kind: 'noul', prompt: 'The citizen declined, refused, or asked NOT to submit the application.' },
-        { id: 'intent_action', kind: 'choice', prompt: 'What action should the DPI pipeline take?', options: ['affirmative_auto_submit', 'request_clarification', 'abort_and_purge'] },
+        { id: 'intent_action', kind: 'choice', prompt: "What action should the DPI pipeline take based on the citizen's response?", options: ['affirmative_auto_submit', 'request_clarification', 'abort_and_purge'] },
       ],
       body.jevify_recipe
     );
@@ -1282,6 +1664,7 @@ export async function handleOfflineRequest(path, options = {}) {
     if (consentGranted) {
       ca = createDepaConsentArtefact(citizen, scheme, body.otp_code ? 'OTP_FALLBACK' : body.channel || 'BHASHINI_VOICE_ASR', utterance);
       CONSENT_ARTEFACTS.unshift(ca);
+      savePersistedState();
     }
     return {
       consent_granted: consentGranted,
@@ -1294,19 +1677,27 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/dbt/dispatch') {
-    const citizen = CITIZENS_BY_ID[body.citizen_id] || CITIZENS[0];
-    const scheme = SCHEMES.find((s) => s.id === body.scheme_id) || SCHEMES[0];
+    const citizen = CITIZENS_BY_ID[body.citizen_id || 'CIT-001'];
+    if (!citizen) throw new Error(`Citizen '${body.citizen_id}' not found.`);
+    const scheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-02'));
+    if (!scheme) throw new Error(`Scheme '${body.scheme_id}' not found.`);
     let ca = null;
     if (body.consent_artefact_id) {
       ca = CONSENT_ARTEFACTS.find((c) => c.artefact_id === body.consent_artefact_id);
       if (!ca) {
         throw new Error(`DEPA Consent Artefact '${body.consent_artefact_id}' not found.`);
       }
+      if (ca.citizen_id !== citizen.id || ca.purpose_code !== `PROACTIVE_WELFARE_CLAIM::${scheme.code}`) {
+        throw new Error('DEPA Consent Artefact is purpose-bound to a different citizen or scheme.');
+      }
       if (ca.status === 'REVOKED_POST_EXECUTION') {
         throw new Error('DEPA Consent Artefact has already been revoked post-execution (DPDP Act 2023 single-use enforcement).');
       }
     } else {
-      const utterance = (body.spoken_utterance || 'Haan, manzoor hai').trim();
+      const utterance = (body.spoken_utterance !== undefined ? String(body.spoken_utterance) : 'Haan, manzoor hai').trim();
+      if (!utterance) {
+        throw new Error('spoken_utterance or consent_artefact_id is required.');
+      }
       const check = askJevifyBatch(`Citizen Response to ${scheme.name}: ${utterance}`, [
         { id: 'consent_affirmative', kind: 'noul', prompt: 'The citizen explicitly consents and approves auto-submission via DigiLocker.' },
         { id: 'negation_flip_guard', kind: 'noul', prompt: 'The citizen declined, refused, or asked NOT to submit the application.' },
@@ -1319,6 +1710,7 @@ export async function handleOfflineRequest(path, options = {}) {
     }
     const receipt = dispatchDbtTransaction(citizen, scheme, ca);
     DBT_DISPATCH_LEDGER.unshift(receipt);
+    savePersistedState();
     const ev = evaluateCitizenScheme(citizen, scheme);
     return { status: 'DISBURSED', dbt_receipt: receipt, revoked_consent_artefact: ca, chain_of_entitlement: ev.chain_of_entitlement };
   }
@@ -1385,9 +1777,9 @@ export async function handleOfflineRequest(path, options = {}) {
 
     const totalScanned = CITIZENS.length;
     const s2 = Math.max(1, Math.min(totalScanned, totalQualified));
-    const s3 = Math.max(1, s2 - 6);
-    const s4 = Math.max(1, s3 - 5 + Math.min(4, CONSENT_ARTEFACTS.length));
-    const s5 = Math.max(1, s4 - 4 + Math.min(4, DBT_DISPATCH_LEDGER.length));
+    const s3 = Math.max(1, Math.min(s2, s2 - 6));
+    const s4 = Math.max(1, Math.min(s3, s3 - 5 + Math.min(4, CONSENT_ARTEFACTS.length)));
+    const s5 = Math.max(1, Math.min(s4, s4 - 4 + Math.min(4, DBT_DISPATCH_LEDGER.length)));
 
     return {
       macro_impact_metrics: {
@@ -1416,8 +1808,13 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/admin/hitl-review') {
-    const citizen = CITIZENS_BY_ID[body.citizen_id] || CITIZENS_BY_ID['CIT-023'];
-    const scheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-01')) || SCHEMES[0];
+    const citizen = CITIZENS_BY_ID[body.citizen_id];
+    if (!citizen) throw new Error(`Citizen '${body.citizen_id}' not found.`);
+    const scheme = SCHEMES.find((s) => s.id === (body.scheme_id || 'SCH-01'));
+    if (!scheme) throw new Error(`Scheme '${body.scheme_id}' not found.`);
+    if (!['APPROVED_OVERRIDE', 'DEFERRED_FIELD_VERIFICATION'].includes(body.decision)) {
+      throw new Error("decision must be 'APPROVED_OVERRIDE' or 'DEFERRED_FIELD_VERIFICATION'.");
+    }
     const nowIso = new Date().toISOString();
     const auditEntry = {
       audit_id: `HITL-AUDIT-${String(HITL_AUDIT_TRAIL.length + 1).padStart(3, '0')}`,
@@ -1427,14 +1824,15 @@ export async function handleOfflineRequest(path, options = {}) {
       panchayat: citizen.panchayat,
       scheme_id: scheme.id,
       scheme_name: scheme.name,
-      decision: body.decision || 'APPROVED_OVERRIDE',
+      decision: body.decision,
       officer_name: body.officer_name || 'Prakash Nadagouda (PDO, Gram Panchayat)',
       officer_notes: body.officer_notes || 'Verified physical Bhoomi mutation & KCC passbook; net holding is within statutory limit.',
-      paper_trail_signature: '0x' + simpleHash(`${citizen.id}::${scheme.id}::${nowIso}`).slice(0, 20),
+      paper_trail_signature: '0x' + simpleHash(`${citizen.id}::${scheme.id}::${body.decision}::${nowIso}`).slice(0, 20),
       reviewed_at: nowIso,
     };
     HITL_OVERRIDES[`${citizen.id}::${scheme.id}`] = auditEntry;
     HITL_AUDIT_TRAIL.unshift(auditEntry);
+    savePersistedState();
     return { status: 'HITL_DECISION_RECORDED', audit_entry: auditEntry, updated_evaluation: evaluateCitizenScheme(citizen, scheme) };
   }
 
@@ -1453,10 +1851,18 @@ export async function handleOfflineRequest(path, options = {}) {
       status: 'PROBED_AND_VERIFIED',
       command: `jevify probe recipes/${recipe.name}.yaml`,
       recipe,
+      selected_readout_rung: recipe.readout_rung,
+      telemetry_contract: 'x_jevify/1.0 (logprobs + cache_hit)',
+      prefix_cache_warmup: {
+        enabled: recipe.prefix_cache_enabled,
+        warmup_ms: Math.max(4, Math.floor(recipe.median_latency_ms * 0.65)),
+      },
       rungs_tested: [
-        { rung: 'named_token_logprobs', supported: true, selected: true },
+        { rung: 'named_token_logprobs', supported: true, selected: recipe.kind === 'endpoint' },
         { rung: 'grammar_post_sampling', supported: true, selected: false },
         { rung: 'top_k_logprobs', supported: true, selected: false },
+        { rung: 'embedding_cosine_similarity', supported: recipe.kind === 'embedding', selected: recipe.kind === 'embedding' },
+        { rung: 'encoder_entailment_head', supported: recipe.kind === 'encoder', selected: recipe.kind === 'encoder' },
       ],
       single_token_alphabet_verified: 26,
       invariants_contract: 'No free-form generation; answers read directly off next-token distribution in 1 pass.',
@@ -1464,7 +1870,13 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/ai/jevify/ask') {
-    return askJevifyBatch(body.state || '', body.questions || [], body.recipe);
+    if (!String(body.state || '').trim()) {
+      throw new Error('State text cannot be empty.');
+    }
+    if (!Array.isArray(body.questions) || body.questions.length === 0) {
+      throw new Error('At least one typed question is required.');
+    }
+    return askJevifyBatch(body.state, body.questions, body.recipe);
   }
 
   if (pathname === '/auth/siwc/session') {
@@ -1484,22 +1896,27 @@ export async function handleOfflineRequest(path, options = {}) {
   }
 
   if (pathname === '/auth/siwc/callback') {
+    const email = body.email || ACTIVE_SIWC_SESSION.user.email;
     ACTIVE_SIWC_SESSION = {
       ...ACTIVE_SIWC_SESSION,
       authenticated: true,
       active_model: body.active_model || 'gpt-4o',
       user: {
         ...ACTIVE_SIWC_SESSION.user,
-        email: body.email || ACTIVE_SIWC_SESSION.user.email,
+        sub: 'oauth2|chatgpt|' + simpleHash(email).slice(0, 12),
+        name: email.split('@')[0].replace(/\./g, ' '),
+        email,
         plan_tier: body.plan_tier || ACTIVE_SIWC_SESSION.user.plan_tier,
       },
       connected_at: new Date().toISOString(),
     };
+    savePersistedState();
     return ACTIVE_SIWC_SESSION;
   }
 
   if (pathname === '/auth/siwc/revoke') {
-    ACTIVE_SIWC_SESSION = { ...ACTIVE_SIWC_SESSION, authenticated: false };
+    ACTIVE_SIWC_SESSION = { ...ACTIVE_SIWC_SESSION, authenticated: false, revoked_at: new Date().toISOString() };
+    savePersistedState();
     return { status: 'SIWC_SESSION_REVOKED', authenticated: false, message: 'Sign in with ChatGPT OAuth session revoked.' };
   }
 
