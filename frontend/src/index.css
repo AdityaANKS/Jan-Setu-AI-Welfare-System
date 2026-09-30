@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-parchment: #EFECE3;
+  --bg-stone: #E3DEC9;
+  --bg-surface-elevated: #F7F5EE;
+  --border-hairline: #CEC7B4;
+  --border-strong: #131B2E;
+  --bg-navy-deep: #131B2E;
+  --bg-navy-surface: #1B253B;
+  --accent-terracotta: #C85A32;
+  --accent-forest: #2C4A3E;
+  --accent-ochre: #C59B38;
+  --text-primary: #131B2E;
+  --text-secondary: #4A505C;
+  --text-mono: #6E6A5F;
+}
+
+.dark {
+  --bg-parchment: #0F1626;
+  --bg-stone: #162035;
+  --bg-surface-elevated: #1B2740;
+  --border-hairline: #2B3957;
+  --border-strong: #E3DEC9;
+  --text-primary: #F5F2EB;
+  --text-secondary: #B8C0D0;
+  --text-mono: #94A0B8;
+}
+
+body {
+  background-color: var(--bg-parchment);
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'Noto Sans Kannada', system-ui, sans-serif;
+  line-height: 1.5;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Editorial Top Rule Cards per MASTER.md */
+.card-rule-forest {
+  border-top: 3px solid #2C4A3E;
+}
+.card-rule-navy {
+  border-top: 3px solid #131B2E;
+}
+.card-rule-terracotta {
+  border-top: 3px solid #C85A32;
+}
+.card-rule-ochre {
+  border-top: 3px solid #C59B38;
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-stone);
+}
+::-webkit-scrollbar-thumb {
+  background: #9B9584;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

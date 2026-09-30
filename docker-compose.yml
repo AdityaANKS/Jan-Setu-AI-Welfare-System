@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  jansetu-backend:
+    build: ./backend
+    container_name: jansetu-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  jansetu-frontend:
+    build: ./frontend
+    container_name: jansetu-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE=http://localhost:8000/api/v1
+    depends_on:
+      - jansetu-backend

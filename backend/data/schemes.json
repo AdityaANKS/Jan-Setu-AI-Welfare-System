@@ -1,0 +1,595 @@
+[
+  {
+    "id": "SCH-01",
+    "code": "KA-KRISHI-SANJEEVANI-2026",
+    "name": "Karnataka Krishi Sanjeevani Scheme",
+    "name_hi": "कर्नाटक कृषि संजीवनी योजना",
+    "name_kn": "ಕರ್ನಾಟಕ ಕೃಷಿ ಸಂಜೀವಿನಿ ಯೋಜನೆ",
+    "ministry": "Department of Agriculture, Government of Karnataka",
+    "level": "State",
+    "state_scope": "KA",
+    "category": "Agriculture & Soil Resilience",
+    "benefit_amount_inr": 18000,
+    "benefit_summary": "₹18,000 Direct Micro-Irrigation & Soil Rejuvenation Grant",
+    "disbursement_rail": "PFMS-K2-Aadhaar-DBT",
+    "gazette": {
+      "gazette_id": "KA-GAZ-AGR-2026-No.418",
+      "notification_date": "2026-01-14",
+      "section": "Section 4(B) — Smallholder Climate & Soil Resilience",
+      "clause": "Clause 4.2(a)–(c)",
+      "excerpt": "Every cultivating smallholder domiciled in Karnataka holding less than 2.0 Hectares of rainfed or semi-irrigated agricultural land under Bhoomi RTC records, with an annual household income below ₹2,50,000 and an active Kisan Credit Card or FRUITS ID, shall be entitled to a proactive grant of ₹18,000."
+    },
+    "boolean_ast": "IF (State == \"KA\" AND Occupation == \"Farmer\" AND Land_Holding_Ha < 2.0 AND Annual_Income_INR < 250000 AND KCC_Active == true) -> KA_Krishi_Sanjeevani_Tier_1",
+    "rules": [
+      { "field": "state", "operator": "==", "value": "KA", "label": "Domicile State == Karnataka (KA)", "clause_ref": "Clause 4.2(a)", "zkp_predicate": "ZKP_DOMICILE_KA" },
+      { "field": "occupation", "operator": "==", "value": "Farmer", "label": "Primary Occupation == Cultivator / Farmer", "clause_ref": "Clause 4.2(a)", "zkp_predicate": "ZKP_OCCUPATION_FARMER" },
+      { "field": "land_holding_ha", "operator": "<", "value": 2.0, "label": "Agricultural Land Holding < 2.0 Hectares", "clause_ref": "Clause 4.2(b)", "zkp_predicate": "ZKP_LAND_LT_2HA" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Household Income < ₹2,50,000", "clause_ref": "Clause 4.2(c)", "zkp_predicate": "ZKP_INCOME_LT_250K" },
+      { "field": "kcc_active", "operator": "==", "value": true, "label": "Active Kisan Credit Card / FRUITS Registry", "clause_ref": "Clause 4.2(c)", "zkp_predicate": "ZKP_KCC_VERIFIED" }
+    ],
+    "required_vcs": [
+      "in.gov.karnataka.bhoomi.rtc.v2",
+      "in.gov.nabard.kcc.credential",
+      "in.gov.nad.income.certificate"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। आपके अपडेटेड भूमि रिकॉर्ड और किसान क्रेडिट कार्ड के अनुसार, आप कर्नाटक कृषि संजीवनी योजना के तहत ₹18,000 के सीधे अनुदान के लिए पात्र हैं। डिजिलॉकर के माध्यम से ऑटो-सबमिशन स्वीकृत करने के लिए 'हाँ, मंजूर है' बोलें या 1 दबाएं।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ನಿಮ್ಮ ಭೂಮಿ ಆರ್‌ಟಿಸಿ ಮತ್ತು ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ದಾಖಲೆಗಳ ಪ್ರಕಾರ, ಕರ್ನಾಟಕ ಕೃಷಿ ಸಂಜೀವಿನಿ ಯೋಜನೆಯಡಿ ₹18,000 ಅನುದಾನಕ್ಕೆ ನೀವು ಅರ್ಹರಾಗಿದ್ದೀರಿ. ಡಿಜಿಲಾಕರ್ ಮೂಲಕ ಒಪ್ಪಿಗೆ ನೀಡಲು 'ಹೌದು, ಒಪ್ಪಿಗೆ ಇದೆ' ಎಂದು ಹೇಳಿ ಅಥವಾ 1 ಒತ್ತಿರಿ.",
+      "en": "Namaste {name}-ji. Your verified Bhoomi RTC and Kisan Credit Card records qualify you for an ₹18,000 direct grant under the Karnataka Krishi Sanjeevani Scheme. Say 'Haan, manzoor hai' or press 1 to approve zero-click submission via DigiLocker.",
+      "bho": "प्रणाम {name}-जी। रउआ किसान कार्ड आ जमीन के कागज के आधार पर कृषि संजीवनी योजना में ₹18,000 के अनुदान खातिर चुनल गइल बानी। डिजिलॉकर से तुरंत भेजे खातिर 'हाँ, मंजूर बा' बोलीं।",
+      "mr": "नमस्कार {name}-जी. तुमच्या अद्ययावत सातबारा आणि किसान क्रेडिट कार्डनुसार आपण कृषी संजीवनी योजनेअंतर्गत ₹18,000 अनुदानास पात्र आहात. संमती देण्यासाठी 'होय, मंजूर आहे' म्हणा.",
+      "ta": "வணக்கம் {name} அவர்களே. உங்கள் நில ஆவணம் மற்றும் கிசான் அட்டை அடிப்படையில் கிருஷி சஞ்சீவனி திட்டத்தின் கீழ் ₹18,000 மானியம் பெற தகுதியுடையவர். ஒப்புதல் அளிக்க 'ஆம்' என்று கூறுங்கள்."
+    }
+  },
+  {
+    "id": "SCH-02",
+    "code": "MNRE-PM-KUSUM-COMP-B",
+    "name": "PM-KUSUM (Solar Water Pump Subsidy — Component B)",
+    "name_hi": "पीएम-कुसुम सौर पंप सब्सिडी योजना",
+    "name_kn": "ಪಿಎಂ-ಕುಸುಮ್ ಸೌರ ಪಂಪ್ ಸಬ್ಸಿಡಿ ಯೋಜನೆ",
+    "ministry": "Ministry of New and Renewable Energy (MNRE), Govt. of India",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Clean Energy & Irrigation",
+    "benefit_amount_inr": 15000,
+    "benefit_summary": "60% Solar Pump Subsidy + ₹15,000 State Top-Up Release",
+    "disbursement_rail": "PFMS-MNRE-Escrow-DBT",
+    "gazette": {
+      "gazette_id": "CG-DL-E-19032026-254102",
+      "notification_date": "2026-02-02",
+      "section": "Section 7 — Off-Grid Solar Irrigation Pumps",
+      "clause": "Clause 7.1(b) & Schedule II",
+      "excerpt": "Small and marginal farmers holding up to 2.0 Hectares of agricultural land with an active Kisan Credit Card and annual income under ₹2,50,000 are pre-approved for a 60% capital subsidy plus ₹15,000 direct state margin release."
+    },
+    "boolean_ast": "IF (Occupation == \"Farmer\" AND Land_Holding_Ha <= 2.0 AND Annual_Income_INR < 250000 AND KCC_Active == true) -> PM_KUSUM_Tier_1",
+    "rules": [
+      { "field": "occupation", "operator": "==", "value": "Farmer", "label": "Primary Occupation == Farmer", "clause_ref": "Clause 7.1(a)", "zkp_predicate": "ZKP_OCCUPATION_FARMER" },
+      { "field": "land_holding_ha", "operator": "<=", "value": 2.0, "label": "Land Holding <= 2.0 Hectares", "clause_ref": "Clause 7.1(b)", "zkp_predicate": "ZKP_LAND_LTE_2HA" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Household Income < ₹2,50,000", "clause_ref": "Schedule II(3)", "zkp_predicate": "ZKP_INCOME_LT_250K" },
+      { "field": "kcc_active", "operator": "==", "value": true, "label": "Active Kisan Credit Card (KCC)", "clause_ref": "Schedule II(4)", "zkp_predicate": "ZKP_KCC_VERIFIED" }
+    ],
+    "required_vcs": [
+      "in.gov.nabard.kcc.credential",
+      "in.gov.land.record.vc",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। आपके अपडेटेड किसान क्रेडिट कार्ड से पता चलता है कि आप पीएम-कुसुम के तहत 60% सोलर वाटर पंप सब्सिडी (₹15,000 बकाया) के लिए पात्र हैं। डिजिलॉकर के माध्यम से ऑटो-सबमिशन को मंजूरी देने के लिए 1 दबाएं या 'हाँ, मंजूर है' कहें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ನಿಮ್ಮ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಪ್ರಕಾರ ಪಿಎಂ-ಕುಸುಮ್ ಯೋಜನೆಯಡಿ 60% ಸೌರ ಪಂಪ್ ಸಬ್ಸಿಡಿ (₹15,000 ಬಾಕಿ) ಪಡೆಯಲು ನೀವು ಅರ್ಹರಾಗಿದ್ದೀರಿ. ಒಪ್ಪಿಗೆ ನೀಡಲು 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. Your updated Kisan Credit Card shows you are eligible for a 60% solar water pump subsidy under PM-KUSUM (₹15,000 pending). Press 1 or say 'Haan, manzoor hai' to approve auto-submission through your DigiLocker.",
+      "bho": "नमस्ते {name}-जी। रउआ किसान क्रेडिट कार्ड के अनुसार पीएम-कुसुम में 60% सोलर पंप सब्सिडी (₹15,000) खातिर चुनल गइल बानी। 'हाँ, मंजूर बा' कह के मंजूरी दीं।",
+      "mr": "नमस्कार {name}-जी. आपल्या किसान क्रेडिट कार्डनुसार आपण पीएम-कुसुम ६०% सौर पंप अनुदानास (₹15,000) पात्र आहात. संमतीसाठी १ दाबा किंवा 'होय' म्हणा.",
+      "ta": "வணக்கம் {name} அவர்களே. பிஎம்-குசும் திட்டத்தின் கீழ் 60% சோலார் பம்ப் மானியம் (₹15,000) பெற நீங்கள் தகுதியானவர். ஒப்புதல் அளிக்க 1-ஐ அழுத்தவும்."
+    }
+  },
+  {
+    "id": "SCH-03",
+    "code": "MOAFW-PM-KISAN-19TH",
+    "name": "PM-KISAN Samman Nidhi (Proactive Installment Release)",
+    "name_hi": "पीएम-किसान सम्मान निधि",
+    "name_kn": "ಪಿಎಂ-ಕಿಸಾನ್ ಸಮ್ಮಾನ್ ನಿಧಿ",
+    "ministry": "Ministry of Agriculture & Farmers Welfare, Govt. of India",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Direct Income Support",
+    "benefit_amount_inr": 6000,
+    "benefit_summary": "₹6,000 Annual Assured Farmer Income Support",
+    "disbursement_rail": "PFMS-NPCI-Aadhaar-Bridge",
+    "gazette": {
+      "gazette_id": "CG-MOAFW-2025-8821",
+      "notification_date": "2025-11-10",
+      "section": "Section 3 — Cultivable Landholder Income Support",
+      "clause": "Clause 3.1 & Exclusion Proviso IV",
+      "excerpt": "All landholding farmer families with cultivable land > 0.1 Ha and household income below ₹2,50,000 (non-income-tax payees) shall receive ₹6,000 per annum directly via Aadhaar-seeded bank accounts."
+    },
+    "boolean_ast": "IF (Occupation == \"Farmer\" AND Land_Holding_Ha >= 0.1 AND Annual_Income_INR < 250000) -> PM_KISAN_Eligible",
+    "rules": [
+      { "field": "occupation", "operator": "==", "value": "Farmer", "label": "Occupation == Farmer", "clause_ref": "Clause 3.1", "zkp_predicate": "ZKP_OCCUPATION_FARMER" },
+      { "field": "land_holding_ha", "operator": ">=", "value": 0.1, "label": "Cultivable Land >= 0.1 Hectares", "clause_ref": "Clause 3.1(b)", "zkp_predicate": "ZKP_LAND_GTE_0_1HA" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Non-Taxable Income < ₹2,50,000", "clause_ref": "Proviso IV", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.land.record.vc",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। पीएम-किसान सम्मान निधि की ₹6,000 वार्षिक सहायता आपके आधार-लिंक्ड खाते में भेजने के लिए तैयार है। कृपया 'हाँ, मंजूर है' बोलकर पुष्टि करें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಪಿಎಂ-ಕಿಸಾನ್ ಯೋಜನೆಯ ₹6,000 ನೆರವು ನಿಮ್ಮ ಆಧಾರ್ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಜಮಾ ಮಾಡಲು ಸಿದ್ಧವಾಗಿದೆ. ದಯವಿಟ್ಟು 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. Your ₹6,000 PM-KISAN Samman Nidhi annual benefit is pre-verified via your land record. Say 'Haan, manzoor hai' to trigger instant DBT transfer.",
+      "bho": "प्रणाम {name}-जी। पीएम-किसान के ₹6,000 रउआ खाता में भेजे खातिर तैयार बा। 'हाँ' बोल के मंजूरी दीं।",
+      "mr": "नमस्कार {name}-जी. पीएम-किसान सन्मान निधीचे ₹6,000 आपल्या खात्यात जमा करण्यासाठी तयार आहेत. 'होय' म्हणून संमती द्या.",
+      "ta": "வணக்கம் {name} அவர்களே. பிஎம்-கிசான் ₹6,000 நிதி உங்கள் வங்கி கணக்கில் செலுத்த தயாராக உள்ளது."
+    }
+  },
+  {
+    "id": "SCH-04",
+    "code": "MOWCD-SUKANYA-BALIKA-2026",
+    "name": "Sukanya Samriddhi & Balika Shiksha Seed Grant",
+    "name_hi": "सुकन्या समृद्धि एवं बालिका प्रोत्साहन निधि",
+    "name_kn": "ಸುಕನ್ಯಾ ಸಮೃದ್ಧಿ ಮತ್ತು ಬಾಲಿಕಾ ಪ್ರೋತ್ಸಾಹ ನಿಧಿ",
+    "ministry": "Ministry of Women & Child Development / Ministry of Finance",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Women & Child Welfare",
+    "benefit_amount_inr": 12000,
+    "benefit_summary": "₹12,000 Co-Contributory Girl Child Sovereign Deposit",
+    "disbursement_rail": "IndiaPost-PFMS-DBT",
+    "gazette": {
+      "gazette_id": "CG-MOWCD-2026-114",
+      "notification_date": "2026-01-24",
+      "section": "Section 5 — Proactive Girl Child Financial Inclusion",
+      "clause": "Clause 5.3(a)",
+      "excerpt": "Households with a dependent girl child or young woman aged up to 25 years and annual family income below ₹2,50,000 shall receive a ₹12,000 sovereign seed grant."
+    },
+    "boolean_ast": "IF (Gender == \"Female\" AND Age <= 35 AND Annual_Income_INR < 250000) -> Sukanya_Seed_Grant",
+    "rules": [
+      { "field": "gender", "operator": "==", "value": "Female", "label": "Beneficiary / Guardian Gender == Female", "clause_ref": "Clause 5.3(a)", "zkp_predicate": "ZKP_GENDER_FEMALE" },
+      { "field": "age", "operator": "<=", "value": 35, "label": "Age <= 35 Years", "clause_ref": "Clause 5.3(b)", "zkp_predicate": "ZKP_AGE_LTE_35" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Family Income < ₹2,50,000", "clause_ref": "Clause 5.3(c)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.crsorgi.birth.certificate",
+      "in.gov.nad.income.certificate"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। सुकन्या समृद्धि एवं बालिका प्रोत्साहन योजना के अंतर्गत आपके परिवार के लिए ₹12,000 का अनुदान स्वीकृत हुआ है। 'हाँ, मंजूर है' बोलकर इसे अपने खाते में प्राप्त करें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಸುಕನ್ಯಾ ಸಮೃದ್ಧಿ ಯೋಜನೆಯಡಿ ₹12,000 ಪ್ರೋತ್ಸಾಹ ಧನಕ್ಕೆ ನೀವು ಅರ್ಹರಾಗಿದ್ದೀರಿ. ಒಪ್ಪಿಗೆ ನೀಡಲು 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. You are pre-approved for a ₹12,000 Sukanya Samriddhi & Balika Seed Grant based on your DigiLocker family credentials. Say 'Haan, manzoor hai' to claim.",
+      "bho": "प्रणाम {name}-जी। सुकन्या समृद्धि योजना में ₹12,000 के अनुदान पास भइल बा। 'हाँ' बोल के स्वीकार करीं।",
+      "mr": "नमस्कार {name}-जी. सुकन्या समृद्धी योजनेअंतर्गत ₹12,000 अनुदान मंजूर झाले आहे.",
+      "ta": "வணக்கம் {name} அவர்களே. சுகன்யா சம்ரித்தி திட்டத்தின் கீழ் ₹12,000 நிதி ஒப்புதல் அளிக்கப்பட்டுள்ளது."
+    }
+  },
+  {
+    "id": "SCH-05",
+    "code": "KA-GRUHA-LAKSHMI-2026",
+    "name": "Karnataka Gruha Lakshmi Guarantee Scheme",
+    "name_hi": "गृह लक्ष्मी गारंटी योजना (कर्नाटक)",
+    "name_kn": "ಗೃಹ ಲಕ್ಷ್ಮಿ ಖಾತರಿ ಯೋಜನೆ (ಕರ್ನಾಟಕ)",
+    "ministry": "Department of Women & Child Development, Govt. of Karnataka",
+    "level": "State",
+    "state_scope": "KA",
+    "category": "Women Empowerment & Basic Income",
+    "benefit_amount_inr": 24000,
+    "benefit_summary": "₹24,000 Annual Assured Transfer (₹2,000/month) to Women Household Heads",
+    "disbursement_rail": "K2-Aadhaar-DBT-Monthly",
+    "gazette": {
+      "gazette_id": "KA-DWCD-2025-GL-902",
+      "notification_date": "2025-08-19",
+      "section": "Section 2 — Universal Basic Support for Women Heads of Households",
+      "clause": "Clause 2.1 & 2.4",
+      "excerpt": "Every woman aged 21 years or above listed as head of household on an Antyodaya, BPL, or APL non-taxpaying ration card in Karnataka with annual household income below ₹2,50,000 shall receive ₹2,000 per month (₹24,000/year)."
+    },
+    "boolean_ast": "IF (State == \"KA\" AND Gender == \"Female\" AND Age >= 21 AND Annual_Income_INR < 250000) -> Gruha_Lakshmi_Tier_1",
+    "rules": [
+      { "field": "state", "operator": "==", "value": "KA", "label": "Domicile State == Karnataka (KA)", "clause_ref": "Clause 2.1", "zkp_predicate": "ZKP_DOMICILE_KA" },
+      { "field": "gender", "operator": "==", "value": "Female", "label": "Gender == Female Head of Household", "clause_ref": "Clause 2.1", "zkp_predicate": "ZKP_GENDER_FEMALE" },
+      { "field": "age", "operator": ">=", "value": 21, "label": "Age >= 21 Years", "clause_ref": "Clause 2.2", "zkp_predicate": "ZKP_AGE_GTE_21" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Household Income < ₹2,50,000", "clause_ref": "Clause 2.4", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.karnataka.ahara.rationcard",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। कर्नाटक गृह लक्ष्मी योजना के तहत आपके लिए ₹24,000 वार्षिक सहायता स्वीकृत है। ऑटो-सबमिशन के लिए 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಕರ್ನಾಟಕ ಗೃಹ ಲಕ್ಷ್ಮಿ ಯೋಜನೆಯಡಿ ನಿಮಗೆ ವಾರ್ಷಿಕ ₹24,000 (ತಿಂಗಳಿಗೆ ₹2,000) ಮಂಜೂರಾಗಿದೆ. ಡಿಜಿಲಾಕರ್ ಮೂಲಕ ದೃಢೀಕರಿಸಲು 'ಹೌದು, ಒಪ್ಪಿಗೆ ಇದೆ' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. You qualify for ₹24,000/year under the Karnataka Gruha Lakshmi Guarantee Scheme. Say 'Haan, manzoor hai' to activate direct bank credit.",
+      "bho": "नमस्ते {name}-जी। गृह लक्ष्मी योजना के तहत ₹24,000 सालाना मदद खातिर रउआ पात्र बानी।",
+      "mr": "नमस्कार {name}-जी. गृहलक्ष्मी योजनेअंतर्गत आपण ₹24,000 वार्षिक अनुदानास पात्र आहात.",
+      "ta": "வணக்கம் {name} அவர்களே. கிருஹ லட்சுமி திட்டத்தின் கீழ் ஆண்டுக்கு ₹24,000 பெற தகுதியானவர்."
+    }
+  },
+  {
+    "id": "SCH-06",
+    "code": "NHA-PMJAY-ABHA-2026",
+    "name": "Ayushman Bharat PM-JAY & ABHA Cashless Shield",
+    "name_hi": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+    "name_kn": "ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಪ್ರಧಾನಮಂತ್ರಿ ಜನ ಆರೋಗ್ಯ ಯೋಜನೆ",
+    "ministry": "National Health Authority (NHA), Ministry of Health & Family Welfare",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Healthcare & Social Protection",
+    "benefit_amount_inr": 25000,
+    "benefit_summary": "₹25,000 Outpatient Diagnostic & Primary Care Wallet + ₹5L Hospital Cover",
+    "disbursement_rail": "NHA-ABHA-Smart-Escrow",
+    "gazette": {
+      "gazette_id": "CG-NHA-PMJAY-2025-771",
+      "notification_date": "2025-10-02",
+      "section": "Section 6 — Proactive ABHA Seeding for Low-Income Households",
+      "clause": "Clause 6.1(a)",
+      "excerpt": "All families with annual income below ₹2,00,000 or senior citizens above 60 years shall be proactively provisioned an ABHA health credit wallet and cashless PM-JAY golden card without CSC enrollment fees."
+    },
+    "boolean_ast": "IF (Annual_Income_INR < 200000) -> PMJAY_Golden_Shield",
+    "rules": [
+      { "field": "annual_income_inr", "operator": "<", "value": 200000, "label": "Annual Family Income < ₹2,00,000", "clause_ref": "Clause 6.1(a)", "zkp_predicate": "ZKP_INCOME_LT_200K" }
+    ],
+    "required_vcs": [
+      "in.gov.nha.abha.id",
+      "in.gov.nad.income.certificate"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। आपके आभा (ABHA) कार्ड पर आयुष्मान भारत सुरक्षा कवच और ₹25,000 स्वास्थ्य वॉलेट सक्रिय करने के लिए तैयार है। 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ನಿಮ್ಮ ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಆರೋಗ್ಯ ಕಾರ್ಡ್ ಮತ್ತು ₹25,000 ಆರೋಗ್ಯ ವಾಲೆಟ್ ಸಕ್ರಿಯಗೊಳಿಸಲು 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. Your Ayushman Bharat PM-JAY Golden Shield and ₹25,000 ABHA primary care wallet are ready for zero-click activation. Say 'Haan, manzoor hai' to approve.",
+      "bho": "प्रणाम {name}-जी। आयुष्मान भारत कार्ड आ ₹25,000 स्वास्थ्य मदद चालू करे खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-जी. आयुष्मान भारत कार्ड आणि ₹25,000 आरोग्य कवच सुरू करण्यासाठी संमती द्या.",
+      "ta": "வணக்கம் {name} அவர்களே. ஆயுஷ்மான் பாரத் அட்டை மற்றும் ₹25,000 மருத்துவ நிதியை செயல்படுத்த ஒப்புதல் அளிக்கவும்."
+    }
+  },
+  {
+    "id": "SCH-07",
+    "code": "MSME-PM-VISHWAKARMA-2026",
+    "name": "PM Vishwakarma Kaushal Samman & Toolkit e-Voucher",
+    "name_hi": "पीएम विश्वकर्मा कौशल सम्मान योजना",
+    "name_kn": "ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಕೌಶಲ್ಯ ಸಮ್ಮಾನ್ ಯೋಜನೆ",
+    "ministry": "Ministry of Micro, Small & Medium Enterprises (MoMSME)",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Artisans & Rural Livelihoods",
+    "benefit_amount_inr": 15000,
+    "benefit_summary": "₹15,000 e-RUPI Toolkit Grant + 5% Concessional Enterprise Credit",
+    "disbursement_rail": "NPCI-eRUPI-PFMS",
+    "gazette": {
+      "gazette_id": "CG-MSME-2025-VW-309",
+      "notification_date": "2025-09-17",
+      "section": "Section 4 — Traditional Artisans & Craftspeople",
+      "clause": "Clause 4.1(c)",
+      "excerpt": "Traditional artisans, weavers, carpenters, smiths, and rural craftspeople aged 18 years or above with household income under ₹2,50,000 are entitled to an immediate ₹15,000 toolkit e-voucher."
+    },
+    "boolean_ast": "IF (Occupation == \"Artisan\" AND Age >= 18 AND Annual_Income_INR < 250000) -> PM_Vishwakarma_Toolkit",
+    "rules": [
+      { "field": "occupation", "operator": "==", "value": "Artisan", "label": "Primary Occupation == Artisan / Craftsperson", "clause_ref": "Clause 4.1(a)", "zkp_predicate": "ZKP_OCCUPATION_ARTISAN" },
+      { "field": "age", "operator": ">=", "value": 18, "label": "Age >= 18 Years", "clause_ref": "Clause 4.1(b)", "zkp_predicate": "ZKP_AGE_GTE_18" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Income < ₹2,50,000", "clause_ref": "Clause 4.1(c)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.msme.udyam.artisan",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। पीएम विश्वकर्मा योजना के तहत आपके लिए ₹15,000 का टूलकिट ई-वाउचर स्वीकृत है। इसे तुरंत प्राप्त करने के लिए 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಪಿಎಂ ವಿಶ್ವಕರ್ಮ ಯೋಜನೆಯಡಿ ₹15,000 ಟೂಲ್‌ಕಿಟ್ ಇ-ವೋಚರ್ ನಿಮಗೆ ಮಂಜೂರಾಗಿದೆ. 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. Your ₹15,000 PM Vishwakarma Toolkit e-Voucher is pre-approved based on your artisan registration. Say 'Haan, manzoor hai' to receive it.",
+      "bho": "प्रणाम {name}-जी। पीएम विश्वकर्मा योजना में ₹15,000 के टूलकिट वाउचर पास बा।",
+      "mr": "नमस्कार {name}-जी. पीएम विश्वकर्मा योजनेअंतर्गत ₹15,000 टूलकिट व्हाउचर मंजूर आहे.",
+      "ta": "வணக்கம் {name} அவர்களே. பிஎம் விஸ்வகர்மா திட்டத்தின் கீழ் ₹15,000 கருவித்தொகுப்பு வவுச்சர் தயாராக உள்ளது."
+    }
+  },
+  {
+    "id": "SCH-08",
+    "code": "MH-LADKI-BAHIN-2026",
+    "name": "Mukhyamantri Majhi Ladki Bahin Yojana",
+    "name_hi": "मुख्यमंत्री माझी लाडकी बहीण योजना",
+    "name_kn": "ಮುಖ್ಯಮಂತ್ರಿ ಮಾಝಿ ಲಾಡಕಿ ಬಹಿಣ್ ಯೋಜನೆ",
+    "ministry": "Women & Child Development Department, Govt. of Maharashtra",
+    "level": "State",
+    "state_scope": "MH",
+    "category": "Women Financial Independence",
+    "benefit_amount_inr": 18000,
+    "benefit_summary": "₹18,000/Year Direct Benefit Transfer (₹1,500/Month)",
+    "disbursement_rail": "MahaDBT-Aadhaar-Bridge",
+    "gazette": {
+      "gazette_id": "MH-WCD-2025-GR-2806",
+      "notification_date": "2025-07-28",
+      "section": "GR Clause 3 — Eligibility Criteria",
+      "clause": "Clause 3(1)–(3)",
+      "excerpt": "Women residents of Maharashtra aged between 21 and 65 years whose family annual income does not exceed ₹2,50,000 shall receive ₹1,500 per month directly via Aadhaar-linked bank accounts."
+    },
+    "boolean_ast": "IF (State == \"MH\" AND Gender == \"Female\" AND Age >= 21 AND Age <= 65 AND Annual_Income_INR < 250000) -> Ladki_Bahin_DBT",
+    "rules": [
+      { "field": "state", "operator": "==", "value": "MH", "label": "Domicile State == Maharashtra (MH)", "clause_ref": "Clause 3(1)", "zkp_predicate": "ZKP_DOMICILE_MH" },
+      { "field": "gender", "operator": "==", "value": "Female", "label": "Gender == Female", "clause_ref": "Clause 3(1)", "zkp_predicate": "ZKP_GENDER_FEMALE" },
+      { "field": "age", "operator": ">=", "value": 21, "label": "Age >= 21 Years", "clause_ref": "Clause 3(2)", "zkp_predicate": "ZKP_AGE_GTE_21" },
+      { "field": "age", "operator": "<=", "value": 65, "label": "Age <= 65 Years", "clause_ref": "Clause 3(2)", "zkp_predicate": "ZKP_AGE_LTE_65" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Family Income < ₹2,50,000", "clause_ref": "Clause 3(3)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.maharashtra.domicile.vc",
+      "in.gov.nad.income.certificate"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। मुख्यमंत्री माझी लाडकी बहीण योजना के अंतर्गत ₹18,000 वार्षिक सहायता आपके खाते में भेजने हेतु तैयार है। 'हाँ' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಲಾಡಕಿ ಬಹಿಣ್ ಯೋಜನೆಯಡಿ ₹18,000 ವಾರ್ಷಿಕ ನೆರವಿಗೆ ನೀವು ಅರ್ಹರಾಗಿದ್ದೀರಿ.",
+      "en": "Namaste {name}-ji. You qualify for ₹18,000/year under Mukhyamantri Majhi Ladki Bahin Yojana. Say 'Haan, manzoor hai' to approve MahaDBT transfer.",
+      "bho": "नमस्ते {name}-जी। लाडकी बहीण योजना में ₹18,000 सालाना लाभ खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-ताई. मुख्यमंत्री माझी लाडकी बहीण योजनेअंतर्गत आपण ₹18,000 वार्षिक सन्मान निधीस पात्र आहात. डिजिलॉकरद्वारे मंजुरी देण्यासाठी 'होय, मंजूर आहे' म्हणा किंवा १ दाबा.",
+      "ta": "வணக்கம் {name} அவர்களே. லாட்கி பஹின் திட்டத்தின் கீழ் ₹18,000 பெற ஒப்புதல் அளிக்கவும்."
+    }
+  },
+  {
+    "id": "SCH-09",
+    "code": "MOSJE-POST-MATRIC-SCHOLARSHIP",
+    "name": "National Post-Matric Scholarship (SC/ST/OBC)",
+    "name_hi": "राष्ट्रीय पोस्ट-मैट्रिक छात्रवृत्ति योजना",
+    "name_kn": "ರಾಷ್ಟ್ರೀಯ ಮೆಟ್ರಿಕ್ ನಂತರದ ವಿದ್ಯಾರ್ಥಿವೇತನ ಯೋಜನೆ",
+    "ministry": "Ministry of Social Justice & Empowerment, Govt. of India",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Higher Education & Youth",
+    "benefit_amount_inr": 20000,
+    "benefit_summary": "₹20,000 Annual Academic Maintenance & Tuition Allowance",
+    "disbursement_rail": "NSP-PFMS-Direct-Credit",
+    "gazette": {
+      "gazette_id": "CG-MOSJE-NSP-2026-108",
+      "notification_date": "2026-01-09",
+      "section": "Section 4 — Proactive Academic Continuation Stipend",
+      "clause": "Clause 4.4(a)–(b)",
+      "excerpt": "Students aged 18 to 25 belonging to SC, ST, or OBC categories with verified DigiLocker academic mark sheets and parental income below ₹2,50,000 shall receive ₹20,000 annually."
+    },
+    "boolean_ast": "IF (Occupation == \"Student\" AND Category_Code IN [\"SC\", \"ST\", \"OBC\"] AND Age >= 18 AND Age <= 25 AND Annual_Income_INR < 250000) -> Post_Matric_Stipend",
+    "rules": [
+      { "field": "occupation", "operator": "==", "value": "Student", "label": "Occupation == Enrolled Student", "clause_ref": "Clause 4.4(a)", "zkp_predicate": "ZKP_STUDENT_ACTIVE" },
+      { "field": "social_category", "operator": "in", "value": ["SC", "ST", "OBC"], "label": "Social Category IN [SC, ST, OBC]", "clause_ref": "Clause 4.4(a)", "zkp_predicate": "ZKP_CASTE_SC_ST_OBC" },
+      { "field": "age", "operator": ">=", "value": 18, "label": "Age >= 18 Years", "clause_ref": "Clause 4.4(a)", "zkp_predicate": "ZKP_AGE_GTE_18" },
+      { "field": "age", "operator": "<=", "value": 25, "label": "Age <= 25 Years", "clause_ref": "Clause 4.4(a)", "zkp_predicate": "ZKP_AGE_18_25" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Parental Income < ₹2,50,000", "clause_ref": "Clause 4.4(b)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.nad.academic.marksheet",
+      "in.gov.nad.caste.certificate",
+      "in.gov.nad.income.certificate"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। आपके डिजिलॉकर शैक्षणिक प्रमाणपत्र के आधार पर आप ₹20,000 की राष्ट्रीय पोस्ट-मैट्रिक छात्रवृत्ति के लिए पात्र हैं। 'हाँ, मंजूर है' बोलकर क्लेम करें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ನಿಮ್ಮ ಡಿಜಿಲಾಕರ್ ಶೈಕ್ಷಣಿಕ ದಾಖಲೆಗಳ ಪ್ರಕಾರ ₹20,000 ರಾಷ್ಟ್ರೀಯ ವಿದ್ಯಾರ್ಥಿವೇತನಕ್ಕೆ ನೀವು ಅರ್ಹರಾಗಿದ್ದೀರಿ.",
+      "en": "Namaste {name}-ji. Your DigiLocker academic credentials qualify you for the ₹20,000 National Post-Matric Scholarship. Say 'Haan, manzoor hai' for zero-click NSP submission.",
+      "bho": "नमस्ते {name}-जी। रउआ ₹20,000 के छात्रवृत्ति खातिर चुनल गइल बानी। 'हाँ' बोल के फॉर्म सबमिट करीं।",
+      "mr": "नमस्कार {name}-जी. आपण ₹20,000 राष्ट्रीय शिष्यवृत्तीसाठी पात्र आहात.",
+      "ta": "வணக்கம் {name} அவர்களே. ₹20,000 தேசிய கல்வி உதவித்தொகை பெற நீங்கள் தகுதியானவர்."
+    }
+  },
+  {
+    "id": "SCH-10",
+    "code": "MOWCD-PMMVY-MATERNITY-2026",
+    "name": "Pradhan Mantri Matru Vandana Yojana (PMMVY 2.0)",
+    "name_hi": "प्रधानमंत्री मातृ वंदना योजना",
+    "name_kn": "ಪ್ರಧಾನಮಂತ್ರಿ ಮಾತೃ ವಂದನಾ ಯೋಜನೆ",
+    "ministry": "Ministry of Women & Child Development, Govt. of India",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Maternal Nutrition & Health",
+    "benefit_amount_inr": 6000,
+    "benefit_summary": "₹6,000 Maternity Nutrition & Wage-Loss Compensation",
+    "disbursement_rail": "PMMVY-CAS-PFMS-DBT",
+    "gazette": {
+      "gazette_id": "CG-MOWCD-PMMVY-2025-512",
+      "notification_date": "2025-12-01",
+      "section": "Section 3 — Proactive Maternal Benefit Trigger",
+      "clause": "Clause 3.2",
+      "excerpt": "Women aged 19 to 40 years from low-income households (income < ₹2,50,000) registered on ABHA/RCH portals shall receive ₹6,000 directly without manual Anganwadi paper filings."
+    },
+    "boolean_ast": "IF (Gender == \"Female\" AND Age >= 19 AND Age <= 40 AND Annual_Income_INR < 250000) -> PMMVY_Maternal_Grant",
+    "rules": [
+      { "field": "gender", "operator": "==", "value": "Female", "label": "Gender == Female", "clause_ref": "Clause 3.2(a)", "zkp_predicate": "ZKP_GENDER_FEMALE" },
+      { "field": "age", "operator": ">=", "value": 19, "label": "Age >= 19 Years", "clause_ref": "Clause 3.2(a)", "zkp_predicate": "ZKP_AGE_GTE_19" },
+      { "field": "age", "operator": "<=", "value": 40, "label": "Age <= 40 Years", "clause_ref": "Clause 3.2(a)", "zkp_predicate": "ZKP_AGE_19_40" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Household Income < ₹2,50,000", "clause_ref": "Clause 3.2(b)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.nha.abha.id",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। प्रधानमंत्री मातृ वंदना योजना के अंतर्गत ₹6,000 की पोषण सहायता राशि आपके खाते में भेजने के लिए तैयार है। 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಪ್ರಧಾನಮಂತ್ರಿ ಮಾತೃ ವಂದನಾ ಯೋಜನೆಯ ₹6,000 ನೆರವಿಗೆ ಒಪ್ಪಿಗೆ ನೀಡಲು 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. You are pre-approved for ₹6,000 under Pradhan Mantri Matru Vandana Yojana. Say 'Haan, manzoor hai' to confirm direct transfer.",
+      "bho": "प्रणाम {name}-जी। मातृ वंदना योजना के ₹6,000 खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-जी. प्रधानमंत्री मातृ वंदना योजनेचे ₹6,000 मंजूर आहेत.",
+      "ta": "வணக்கம் {name} அவர்களே. மாத்ரு வந்தனா திட்டத்தின் ₹6,000 நிதிக்கு ஒப்புதல் அளிக்கவும்."
+    }
+  },
+  {
+    "id": "SCH-11",
+    "code": "NABARD-KCC-SUBVENTION-2026",
+    "name": "Kisan Credit Card (KCC) 4% Interest Subvention Rebate",
+    "name_hi": "किसान क्रेडिट कार्ड 4% ब्याज छूट प्रोत्साहन",
+    "name_kn": "ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ 4% ಬಡ್ಡಿ ರಿಯಾಯಿತಿ",
+    "ministry": "NABARD / Department of Financial Services, Ministry of Finance",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Agricultural Credit Relief",
+    "benefit_amount_inr": 10000,
+    "benefit_summary": "₹10,000 Prompt Repayment Interest Rebate Credit",
+    "disbursement_rail": "NABARD-CBS-KCC-Credit",
+    "gazette": {
+      "gazette_id": "CG-DFS-NABARD-2026-204",
+      "notification_date": "2026-01-18",
+      "section": "Section 9 — Modified Interest Subvention Scheme (MISS)",
+      "clause": "Clause 9.2",
+      "excerpt": "Cultivating farmers holding an active Kisan Credit Card with land holding under 3.0 Hectares shall automatically receive a 3% prompt repayment incentive plus 1% climate relief rebate up to ₹10,000."
+    },
+    "boolean_ast": "IF (Occupation == \"Farmer\" AND KCC_Active == true AND Land_Holding_Ha <= 3.0) -> KCC_Subvention_Rebate",
+    "rules": [
+      { "field": "occupation", "operator": "==", "value": "Farmer", "label": "Occupation == Farmer", "clause_ref": "Clause 9.2(a)", "zkp_predicate": "ZKP_OCCUPATION_FARMER" },
+      { "field": "kcc_active", "operator": "==", "value": true, "label": "Active Kisan Credit Card == True", "clause_ref": "Clause 9.2(b)", "zkp_predicate": "ZKP_KCC_VERIFIED" },
+      { "field": "land_holding_ha", "operator": "<=", "value": 3.0, "label": "Land Holding <= 3.0 Hectares", "clause_ref": "Clause 9.2(c)", "zkp_predicate": "ZKP_LAND_LTE_3HA" }
+    ],
+    "required_vcs": [
+      "in.gov.nabard.kcc.credential"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। आपके किसान क्रेडिट कार्ड पर ₹10,000 की 4% ब्याज छूट राशि स्वीकृत है। इसे खाते में जमा करने के लिए 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ನಿಮ್ಮ ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಮೇಲೆ ₹10,000 ಬಡ್ಡಿ ರಿಯಾಯಿತಿ ಮಂಜೂರಾಗಿದೆ.",
+      "en": "Namaste {name}-ji. Your Kisan Credit Card qualifies for an automatic ₹10,000 interest subvention rebate under NABARD MISS. Say 'Haan, manzoor hai' to credit.",
+      "bho": "प्रणाम {name}-जी। किसान कार्ड पर ₹10,000 के ब्याज छूट मिल रहल बा।",
+      "mr": "नमस्कार {name}-जी. आपल्या किसान क्रेडिट कार्डवर ₹10,000 व्याज सवलत मंजूर आहे.",
+      "ta": "வணக்கம் {name} அவர்களே. கிசான் அட்டைக்கு ₹10,000 வட்டி தள்ளுபடி ஒப்புதல் அளிக்கப்பட்டுள்ளது."
+    }
+  },
+  {
+    "id": "SCH-12",
+    "code": "MOPNG-PM-UJJWALA-2-0",
+    "name": "PM Ujjwala Yojana 2.0 Clean Cooking Refill Subsidy",
+    "name_hi": "प्रधानमंत्री उज्ज्वला योजना 2.0",
+    "name_kn": "ಪ್ರಧಾನಮಂತ್ರಿ ಉಜ್ವಲ ಯೋಜನೆ 2.0",
+    "ministry": "Ministry of Petroleum & Natural Gas (MoPNG)",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Clean Energy & Household Welfare",
+    "benefit_amount_inr": 3600,
+    "benefit_summary": "₹3,600 Annual LPG Clean Cooking Refill Credit (12 Refills)",
+    "disbursement_rail": "PAHAL-PFMS-DBT",
+    "gazette": {
+      "gazette_id": "CG-MOPNG-UJJ-2025-641",
+      "notification_date": "2025-11-22",
+      "section": "Section 2 — Targeted LPG Subsidy for BPL/Low-Income Women",
+      "clause": "Clause 2.3",
+      "excerpt": "Adult women from households with annual income below ₹2,00,000 shall receive ₹300 per cylinder for up to 12 refills annually (₹3,600) directly via PAHAL DBT."
+    },
+    "boolean_ast": "IF (Gender == \"Female\" AND Age >= 18 AND Annual_Income_INR < 200000) -> Ujjwala_Refill_Credit",
+    "rules": [
+      { "field": "gender", "operator": "==", "value": "Female", "label": "Gender == Adult Woman", "clause_ref": "Clause 2.3(a)", "zkp_predicate": "ZKP_GENDER_FEMALE" },
+      { "field": "age", "operator": ">=", "value": 18, "label": "Age >= 18 Years", "clause_ref": "Clause 2.3(a)", "zkp_predicate": "ZKP_AGE_GTE_18" },
+      { "field": "annual_income_inr", "operator": "<", "value": 200000, "label": "Annual Income < ₹2,00,000", "clause_ref": "Clause 2.3(b)", "zkp_predicate": "ZKP_INCOME_LT_200K" }
+    ],
+    "required_vcs": [
+      "in.gov.uidai.aadhaar.kyc",
+      "in.gov.nad.income.certificate"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। पीएम उज्ज्वला योजना के तहत ₹3,600 की वार्षिक रसोई गैस सब्सिडी आपके लिए स्वीकृत है। 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಪಿಎಂ ಉಜ್ವಲ ಯೋಜನೆಯಡಿ ₹3,600 ಅಡುಗೆ ಅನಿಲ ಸಬ್ಸಿಡಿಗೆ ಒಪ್ಪಿಗೆ ನೀಡಲು 'ಹೌದು' ಎಂದು ಹೇಳಿ.",
+      "en": "Namaste {name}-ji. You qualify for ₹3,600 in annual LPG refill subsidies under PM Ujjwala 2.0. Say 'Haan, manzoor hai' to link via DigiLocker.",
+      "bho": "प्रणाम {name}-जी। उज्ज्वला गैस सब्सिडी ₹3,600 खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-जी. उज्ज्वला गॅस अनुदानासाठी ₹3,600 मंजूर आहेत.",
+      "ta": "வணக்கம் {name} அவர்களே. உஜ்வாலா எரிவாயு மானியம் ₹3,600 பெற ஒப்புதல் அளிக்கவும்."
+    }
+  },
+  {
+    "id": "SCH-13",
+    "code": "MORD-MGNREGA-CLIMATE-ALLOWANCE",
+    "name": "MGNREGA Drought & Seasonal Wage Resilience Allowance",
+    "name_hi": "मनरेगा जलवायु एवं मौसमी मजदूरी भत्ता",
+    "name_kn": "ನರೇಗಾ ಹವಾಮಾನ ಮತ್ತು ಕೂಲಿ ಭತ್ಯೆ ಯೋಜನೆ",
+    "ministry": "Ministry of Rural Development (MoRD), Govt. of India",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Rural Employment & Climate Resilience",
+    "benefit_amount_inr": 9500,
+    "benefit_summary": "₹9,500 Additional 25-Day Climate Wage Compensation",
+    "disbursement_rail": "NeFMS-PFMS-Aadhaar-DBT",
+    "gazette": {
+      "gazette_id": "CG-MORD-NREGA-2026-312",
+      "notification_date": "2026-02-05",
+      "section": "Section 7(2) — Proactive Drought & Heatwave Wage Top-Up",
+      "clause": "Clause 7.2(b)",
+      "excerpt": "Rural wage seekers and marginal farmers with household income below ₹1,80,000 and land holding below 1.5 Hectares are entitled to a ₹9,500 seasonal wage top-up."
+    },
+    "boolean_ast": "IF (Annual_Income_INR < 180000 AND Land_Holding_Ha < 1.5) -> MGNREGA_Climate_Wage",
+    "rules": [
+      { "field": "annual_income_inr", "operator": "<", "value": 180000, "label": "Annual Household Income < ₹1,80,000", "clause_ref": "Clause 7.2(a)", "zkp_predicate": "ZKP_INCOME_LT_180K" },
+      { "field": "land_holding_ha", "operator": "<", "value": 1.5, "label": "Land Holding < 1.5 Hectares", "clause_ref": "Clause 7.2(b)", "zkp_predicate": "ZKP_LAND_LT_1_5HA" }
+    ],
+    "required_vcs": [
+      "in.gov.mord.nrega.jobcard",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। मनरेगा मौसमी मजदूरी सुरक्षा के तहत ₹9,500 की राशि आपके जॉब कार्ड पर स्वीकृत है। 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ನರೇಗಾ ಯೋಜನೆಯಡಿ ₹9,500 ಹೆಚ್ಚುವರಿ ಕೂಲಿ ಭತ್ಯೆ ಮಂಜೂರಾಗಿದೆ.",
+      "en": "Namaste {name}-ji. You qualify for a ₹9,500 MGNREGA Seasonal Wage Resilience Allowance. Say 'Haan, manzoor hai' to receive direct NeFMS payment.",
+      "bho": "प्रणाम {name}-जी। मनरेगा के ₹9,500 भत्ता खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-जी. मनरेगा अंतर्गत ₹9,500 भत्ता मंजूर झाला आहे.",
+      "ta": "வணக்கம் {name} அவர்களே. மகாத்மா காந்தி வேலைவாய்ப்பு திட்டத்தின் கீழ் ₹9,500 நிதி தயாராக உள்ளது."
+    }
+  },
+  {
+    "id": "SCH-14",
+    "code": "DFS-STANDUP-MICRO-ENTERPRISE",
+    "name": "Stand-Up India SC/ST & Women Micro-Enterprise Seed Grant",
+    "name_hi": "स्टैंड-अप इंडिया ग्रामीण उद्यम अनुदान",
+    "name_kn": "ಸ್ಟ್ಯಾಂಡ್-ಅಪ್ ಇಂಡಿಯಾ ಗ್ರಾಮೀಣ ಉದ್ಯಮ ಅನುದಾನ",
+    "ministry": "Department of Financial Services (DFS), Ministry of Finance",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Inclusive Entrepreneurship",
+    "benefit_amount_inr": 35000,
+    "benefit_summary": "₹35,000 Margin Money Grant for Greenfield Rural Micro-Enterprise",
+    "disbursement_rail": "SIDBI-PFMS-Escrow",
+    "gazette": {
+      "gazette_id": "CG-DFS-SUI-2026-089",
+      "notification_date": "2026-01-29",
+      "section": "Section 5 — Margin Money Subsidy for SC/ST & Women Entrepreneurs",
+      "clause": "Clause 5.1",
+      "excerpt": "Entrepreneurs or self-employed citizens belonging to SC/ST communities or women aged 21–55 with annual income below ₹2,50,000 qualify for a ₹35,000 seed capital grant."
+    },
+    "boolean_ast": "IF (Category_Code IN [\"SC\", \"ST\"] AND Age >= 21 AND Annual_Income_INR < 250000) -> StandUp_Seed_Grant",
+    "rules": [
+      { "field": "social_category", "operator": "in", "value": ["SC", "ST"], "label": "Social Category IN [SC, ST]", "clause_ref": "Clause 5.1(a)", "zkp_predicate": "ZKP_CASTE_SC_ST" },
+      { "field": "age", "operator": ">=", "value": 21, "label": "Age >= 21 Years", "clause_ref": "Clause 5.1(b)", "zkp_predicate": "ZKP_AGE_GTE_21" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Annual Income < ₹2,50,000", "clause_ref": "Clause 5.1(c)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.nad.caste.certificate",
+      "in.gov.msme.udyam.registration"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। स्टैंड-अप इंडिया ग्रामीण उद्यम योजना के अंतर्गत आप ₹35,000 के सीड कैपिटल अनुदान के लिए पात्र हैं। 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಸ್ಟ್ಯಾಂಡ್-ಅಪ್ ಇಂಡಿಯಾ ಯೋಜನೆಯಡಿ ₹35,000 ಉದ್ಯಮ ಅನುದಾನಕ್ಕೆ ನೀವು ಅರ್ಹರಾಗಿದ್ದೀರಿ.",
+      "en": "Namaste {name}-ji. Your DigiLocker credentials qualify you for a ₹35,000 Stand-Up India Micro-Enterprise Seed Grant. Say 'Haan, manzoor hai' to claim.",
+      "bho": "प्रणाम {name}-जी। स्टैंड-अप इंडिया में ₹35,000 के रोजगार अनुदान खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-जी. स्टँड-अप इंडिया योजनेअंतर्गत ₹35,000 अनुदान मंजूर आहे.",
+      "ta": "வணக்கம் {name} அவர்களே. ஸ்டாண்ட்-அப் இந்தியா திட்டத்தின் கீழ் ₹35,000 மானியம் பெற ஒப்புதல் அளிக்கவும்."
+    }
+  },
+  {
+    "id": "SCH-15",
+    "code": "PFRDA-APY-CO-CONTRIBUTION",
+    "name": "Atal Pension Yojana (APY) Sovereign Co-Contribution",
+    "name_hi": "अटल पेंशन योजना सरकारी सह-योगदान",
+    "name_kn": "ಅಟಲ್ ಪಿಂಚಣಿ ಯೋಜನೆ ಸರ್ಕಾರಿ ಸಹ-ಕೊಡುಗೆ",
+    "ministry": "PFRDA / Ministry of Finance, Govt. of India",
+    "level": "Central",
+    "state_scope": "ALL",
+    "category": "Unorganized Sector Pension",
+    "benefit_amount_inr": 2000,
+    "benefit_summary": "₹2,000 Annual Government Pension Co-Contribution",
+    "disbursement_rail": "PFRDA-CRA-Aadhaar",
+    "gazette": {
+      "gazette_id": "CG-MOF-PFRDA-2025-994",
+      "notification_date": "2025-12-15",
+      "section": "Section 8 — Unorganized Sector Social Security Co-Contribution",
+      "clause": "Clause 8.1",
+      "excerpt": "Unorganized sector workers aged 18 to 40 years who are non-income-tax payees (annual income < ₹2,50,000) shall receive a proactive ₹2,000 annual sovereign co-contribution into their APY PRAN."
+    },
+    "boolean_ast": "IF (Age >= 18 AND Age <= 40 AND Annual_Income_INR < 250000) -> APY_Co_Contribution",
+    "rules": [
+      { "field": "age", "operator": ">=", "value": 18, "label": "Age >= 18 Years", "clause_ref": "Clause 8.1(a)", "zkp_predicate": "ZKP_AGE_18_40" },
+      { "field": "age", "operator": "<=", "value": 40, "label": "Age <= 40 Years", "clause_ref": "Clause 8.1(a)", "zkp_predicate": "ZKP_AGE_18_40" },
+      { "field": "annual_income_inr", "operator": "<", "value": 250000, "label": "Non-Taxable Income < ₹2,50,000", "clause_ref": "Clause 8.1(b)", "zkp_predicate": "ZKP_INCOME_LT_250K" }
+    ],
+    "required_vcs": [
+      "in.gov.mol.eshram.uan",
+      "in.gov.uidai.aadhaar.kyc"
+    ],
+    "voice_scripts": {
+      "hi": "नमस्ते {name}-जी। अटल पेंशन योजना में ₹2,000 का सरकारी सह-योगदान आपके ई-श्रम कार्ड के आधार पर स्वीकृत है। 'हाँ, मंजूर है' बोलें।",
+      "kn": "ನಮಸ್ಕಾರ {name} ಅವರೇ. ಅಟಲ್ ಪಿಂಚಣಿ ಯೋಜನೆಯಡಿ ₹2,000 ಸರ್ಕಾರಿ ಸಹ-ಕೊಡುಗೆ ನಿಮಗೆ ಮಂಜೂರಾಗಿದೆ.",
+      "en": "Namaste {name}-ji. Your e-Shram credential qualifies you for a ₹2,000 sovereign co-contribution under Atal Pension Yojana. Say 'Haan, manzoor hai' to confirm.",
+      "bho": "प्रणाम {name}-जी। अटल पेंशन योजना में ₹2,000 सरकारी मदद खातिर 'हाँ' बोलीं।",
+      "mr": "नमस्कार {name}-जी. अटल पेन्शन योजनेत ₹2,000 सरकारी सह-योगदान मंजूर आहे.",
+      "ta": "வணக்கம் {name} அவர்களே. அடல் ஓய்வூதியத் திட்டத்தின் கீழ் ₹2,000 அரசு பங்களிப்பு தயாராக உள்ளது."
+    }
+  }
+]

@@ -1,0 +1,63 @@
+openapi: 3.1.0
+info:
+  title: Jan-Setu AI (जन-सेतु) — India Stack Proactive Entitlement Delivery Specification
+  version: 2.4.0
+  description: |
+    Zero-Click Proactive Entitlement Delivery System built on India Stack:
+    - Stage 01: Policy Knowledge Graph & Jevify Single-Pass Typed Readout (`https://github.com/fidecastro/jevify`) + OpenAI Sign in with ChatGPT (`https://developers.openai.com/siwc`)
+    - Stage 02: MeitY DEPA v1.2 Electronic Consent Artefact & Zero-Knowledge Predicate Verification (`DPDP Act 2023`)
+    - Stage 03: AI4Bharat Bhashini Outbound Voice Call & WhatsApp Voice Note (`IndicWav2Vec`, `IndicBART`, `IndicTTS`)
+    - Stage 04: DigiLocker Verifiable Credential Auto-Attachment & PFMS Direct Benefit Transfer (`PID-777`)
+servers:
+  - url: http://localhost:8000
+    description: Local Sovereign DPI Node
+
+paths:
+  /api/v1/health:
+    get:
+      summary: System Health, GraphRAG Node Count, DEPA Broker, Jevify, and OpenAI SIWC Status
+      responses:
+        '200':
+          description: Operational status
+
+  /api/v1/policy/ingest:
+    post:
+      summary: Stage 01 — Ingest Gazette PDF/Text into Deterministic Boolean AST & Jevify Readout
+      responses:
+        '200':
+          description: Extracted Boolean AST rules, Gazette Clause Citations, and Jevify logprob readout
+
+  /api/v1/match/cohort:
+    post:
+      summary: Stage 02 — Run Zero-Knowledge Demographic Matching over 100-Profile KA Pool or 200-Profile National Pool
+      responses:
+        '200':
+          description: Eligible candidates (18/100 on KA Krishi Sanjeevani) + Tier 03 HITL review queue
+
+  /api/v1/voice/outbound:
+    post:
+      summary: Stage 03 — Generate Bhashini Outbound IVR / WhatsApp Voice Prompt in 6 Indian Languages
+      responses:
+        '200':
+          description: Localized voice script and Bhashini pipeline metadata
+
+  /api/v1/voice/verify-consent:
+    post:
+      summary: Stage 03 — Verify Spoken Utterance via Jevify Single-Pass NLU (with Negation Flip Guard) & Mint DEPA Consent Artefact
+      responses:
+        '200':
+          description: Signed MeitY DEPA Consent Artefact
+
+  /api/v1/dbt/dispatch:
+    post:
+      summary: Stage 04 — Attach DigiLocker VCs, Revoke Transient DEPA Token, and Trigger PFMS DBT Credit (PID-777)
+      responses:
+        '200':
+          description: Immutable PFMS DBT Receipt linked to PID-777
+
+  /api/v1/admin/hitl-review:
+    post:
+      summary: Tier 03 Exclusion Safeguard — Panchayat Officer Human-in-the-Loop Override / Deferral
+      responses:
+        '200':
+          description: Cryptographically signed paper-trail audit entry
